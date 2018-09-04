@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:magic_flutter/model.dart';
+import 'package:magic_flutter/app_data.dart';
+import 'package:magic_flutter/models/end_point.dart';
 
-class FullScreenDialogDemo extends StatefulWidget {
+class EditDetailsPage extends StatefulWidget {
   final EndPoint endPoint;
-  FullScreenDialogDemo(this.endPoint, {Key key}) : super(key: key);
+  EditDetailsPage(this.endPoint, {Key key}) : super(key: key);
 
   @override
-  FullScreenDialogDemoState createState() =>
-      new FullScreenDialogDemoState(endPoint);
+  EditDetailsPageState createState() =>
+      new EditDetailsPageState(endPoint);
 }
-
-class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
+class EditDetailsPageState extends State<EditDetailsPage> {
   EndPoint endPoint;
 
   String _fieldID, _fieldName, _fieldImage;
@@ -22,7 +22,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
 
-  FullScreenDialogDemoState(this.endPoint);
+  EditDetailsPageState(this.endPoint);
 
   @override
   void initState() {
@@ -57,7 +57,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
       this.endPoint.mainFields=mainTemp.toList();
       this.endPoint.secondaryFields=secTemp.toList();
 
-      this.endPoint.save().then((result) {
+      appData.save().then((result) {
         print("Saving done: ${result}.");
       });
 
