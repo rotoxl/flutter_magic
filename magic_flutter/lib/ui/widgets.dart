@@ -13,9 +13,9 @@ class WidgetCategory extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     return new Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      decoration: new BoxDecoration(
-          border: new Border(bottom: new BorderSide(color: themeData.dividerColor))
-      ),
+//      decoration: new BoxDecoration(
+//          border: new Border(bottom: new BorderSide(color: themeData.dividerColor))
+//      ),
       child: new DefaultTextStyle(
         style: Theme.of(context).textTheme.subhead,
         child: new SafeArea(

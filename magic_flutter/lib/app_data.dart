@@ -46,9 +46,9 @@ class AppData{
     if (temp!=null){
       var jsondata=json.decode(temp);
 
-      List<dynamic>json_endpoints=jsondata['endPoints'];
-      for (var i=0; i<json_endpoints.length; i++){
-        var e=EndPoint.fromJson(json_endpoints[i]);
+      List<dynamic>jsonep=jsondata['endPoints'];
+      for (var i=0; i<jsonep.length; i++){
+        var e=EndPoint.fromJson(jsonep[i]);
         _endPoints[e.title]=e;
       }
     }
