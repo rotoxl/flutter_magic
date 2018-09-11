@@ -1,22 +1,28 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:magic_flutter/models/model_card.dart';
 
 
 class EndPoint{
-  String title, url;
-  String idField, imgField, nameField;
+  String endpointTitle, endpointUrl;
+
+  String id, name, text;
+
+  String related;//points to a related item: eg parent
+  var images=List<String>();
+
+  var tags=List<String>();
+  var stats=List<String>();
+  var fields=List<String>();
 
   Color color;
   String type="User";
 
-  var mainFields=List<String>();
-  var secondaryFields=List<String>();
-  var statsFields=List<String>();
+  Map<String, String> headers; //para identificación
 
+  EndPoint({this.endpointTitle, this.endpointUrl, this.color});
 
-  EndPoint({this.title, this.url, this.color});
-
-  List<String> fields(){
+  List<String> allFields(){
     //TODO dynamically load fields from 1st query
 
     List<String> members= ["name", "manaCost", "type", "rarity", "set", "setName", "text", "artist", "number", "power", "toughness", "layout", "imageUrl", "originalText", "originalType", "id",
@@ -26,36 +32,66 @@ class EndPoint{
     return members;
   }
 
+  firstImage(){
+    if (this.images.length==0)
+      return null;
+    else
+      return this.images[0];
+  }
+  secondImage(){
+    if (this.images.length==0)
+      return null;
+    else if (this.images.length==1)
+      return this.images[0];
+    else
+      return this.images[1];
+  }
+
+  List<ModelCard> _cards=new List<ModelCard>();
+  get cards{
+    return _cards;
+  }
+  set cards(List<ModelCard>newcards){
+    this._cards=newcards;
+  }
+  clearCards(){
+    _cards.clear();
+  }
+
   factory EndPoint.fromJson(Map<String, dynamic> json) {
     var c=EndPoint();
 
-    c.title=json['title'];
-    c.url=json['url'];
+    c.endpointTitle=json['title'];
+    c.endpointUrl=json['url'];
     c.color=json['color'];
 
-    c.idField=json['idField'];
-    c.imgField=json['imgField'];
+    c.id=json['id'];
+    c.name=json['name'];
+    c.text=json['text'];
 
-    c.mainFields=List<String>.from(json['mainFields']);
-    c.secondaryFields=List<String>.from(json['secondaryFields']);
-    c.statsFields=List<String>.from(json['statsFields']);
+    c.images=List<String>.from(json['images']);
+
+    c.fields=List<String>.from(json['fields']);
+    c.stats=List<String>.from(json['stats']);
+    c.tags=List<String>.from(json['tags']);
 
     return c;
   }
   Map<String, dynamic> toJson() => {
-    'title': title,
-    'url': url,
+    'title': endpointTitle,
+    'url': endpointUrl,
 
-    'idField': idField,
-    'imgField': imgField,
-    'nameField': nameField,
+    'id': id,
+    'name': name,
+    'text': text,
+
+    'images': images,
+    'stats': stats,
+    'tags': tags,
+    'fields': fields,
 
     //'color': color,
     'type': type,
-
-    'mainFields': mainFields,
-    'secondaryFields': secondaryFields,
-    'statsFields': statsFields,
   };
 //  List<HashMap<String, dynamic>> _values;
 //  dynamic values(int rowNum, String field_id){
