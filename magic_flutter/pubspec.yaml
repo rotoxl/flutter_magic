@@ -1,5 +1,5 @@
-name: magic_flutter
-description: Magic Card Game
+name: APIExplorer
+description: Public API Explorer
 
 dependencies:
   flutter:
@@ -16,6 +16,16 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  flutter_launcher_icons: "^0.6.1"
+
+flutter_icons:
+  image_path_android: "icon/android.png"
+  image_path_ios: "icon/ios.png"
+  android: true
+  ios: true
+  adaptive_icon_background: "#FF073349"
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
