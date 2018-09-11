@@ -14,10 +14,10 @@ class EditDetailsPageState extends State<EditDetailsPage> {
   EndPoint endPoint;
 
   String _fieldID, _fieldName, _fieldImage;
-  String _fieldMain, _fieldSecondary;
+  String _fieldSecondary;
 
   final TextEditingController _fieldNameController = new TextEditingController();
-  final TextEditingController _fieldMainController = new TextEditingController();
+//  final TextEditingController _fieldMainController = new TextEditingController();
   final TextEditingController _fieldSecondaryController = new TextEditingController();
 
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
@@ -26,16 +26,15 @@ class EditDetailsPageState extends State<EditDetailsPage> {
 
   @override
   void initState() {
-    _fieldName = this.endPoint.nameField;
+    _fieldName = this.endPoint.name;
 
-    _fieldID = this.endPoint.idField;
-    _fieldImage = this.endPoint.imgField;
+    _fieldID = this.endPoint.id;
+    _fieldImage = this.endPoint.firstImage();
 
-    _fieldMain = this.endPoint.mainFields.join(", ");
-    _fieldSecondary= this.endPoint.secondaryFields.join(", ");
+    _fieldSecondary= this.endPoint.fields.join(", ");
 
     _fieldNameController.text = _fieldName;
-    _fieldMainController.text = _fieldMain;
+
     _fieldSecondaryController.text = _fieldSecondary;
 
     return super.initState();
@@ -47,15 +46,15 @@ class EditDetailsPageState extends State<EditDetailsPage> {
     } else {
       form.save();
 
-      this.endPoint.idField=_fieldID;
-      this.endPoint.imgField=_fieldImage;
-      this.endPoint.nameField=_fieldName;
+      this.endPoint.id=_fieldID;
+      this.endPoint.images=[_fieldImage];
+      this.endPoint.name=_fieldName;
 
-      var mainTemp=_fieldMain.split(",").map( (s) => s.trim() );
+//      var mainTemp=_fieldMain.split(",").map( (s) => s.trim() );
       var secTemp=_fieldSecondary.split(",").map( (s) => s.trim() );
 
-      this.endPoint.mainFields=mainTemp.toList();
-      this.endPoint.secondaryFields=secTemp.toList();
+//      this.endPoint.mainFields=mainTemp.toList();
+      this.endPoint.fields=secTemp.toList();
 
       appData.save().then((result) {
         print("Saving done: ${result}.");
@@ -69,7 +68,7 @@ class EditDetailsPageState extends State<EditDetailsPage> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     //
-    var listItems = endPoint.fields().map((String value) {
+    var listItems = endPoint.allFields().map((String value) {
       return new DropdownMenuItem<String>(
         value: value,
         child: new Text(value),
@@ -144,29 +143,29 @@ class EditDetailsPageState extends State<EditDetailsPage> {
                         )
                       ],
                     )),
-                new Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    alignment: Alignment.bottomLeft,
-                    child: new TextField(
-                        decoration: const InputDecoration(labelText: 'Name field', hintText: 'field1',),
-                        autocorrect: false,
-                        controller: _fieldNameController,
-                        onChanged: (String value) {
-                          setState(() {
-                            _fieldName = value;
-                          });
-                        })),               new Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    alignment: Alignment.bottomLeft,
-                    child: new TextField(
-                        decoration: const InputDecoration(labelText: 'Main section fields (CSV)', hintText: 'field1, field2',),
-                        autocorrect: false,
-                        controller: _fieldMainController,
-                        onChanged: (String value) {
-                          setState(() {
-                            _fieldMain = value;
-                          });
-                        })),
+//                new Container(
+//                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+//                    alignment: Alignment.bottomLeft,
+//                    child: new TextField(
+//                        decoration: const InputDecoration(labelText: 'Name field', hintText: 'field1',),
+//                        autocorrect: false,
+//                        controller: _fieldNameController,
+//                        onChanged: (String value) {
+//                          setState(() {
+//                            _fieldName = value;
+//                          });
+//                        })),               new Container(
+//                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+//                    alignment: Alignment.bottomLeft,
+//                    child: new TextField(
+//                        decoration: const InputDecoration(labelText: 'Main section fields (CSV)', hintText: 'field1, field2',),
+//                        autocorrect: false,
+//                        controller: _fieldMainController,
+//                        onChanged: (String value) {
+//                          setState(() {
+//                            _fieldMain = value;
+//                          });
+//                        })),
                 new Container(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     alignment: Alignment.bottomLeft,

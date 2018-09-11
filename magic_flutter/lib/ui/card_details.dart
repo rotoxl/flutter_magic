@@ -1,29 +1,28 @@
 import 'dart:async';
+import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
 import 'package:magic_flutter/models/end_point.dart';
 import 'package:magic_flutter/models/model_card.dart';
+import 'package:magic_flutter/ui/image_page.dart';
 
 import 'package:magic_flutter/ui/widgets.dart';
-import 'package:magic_flutter/ui/card_details_edit.dart';
-
-import 'package:magic_flutter/app_data.dart';
 
 class DetailPage extends StatefulWidget {
   final ModelCard _card;
-  final EndPoint _endPoint;
+  final HashMap<String, dynamic> _config;
 
-  DetailPage(this._card, this._endPoint, {Key key}) : super(key: key);
+  DetailPage(this._card, this._config, {Key key}) : super(key: key);
 
   @override
-  _DetailPageState createState() =>
-      new _DetailPageState(this._card, this._endPoint);
+  _DetailPageState createState() => new _DetailPageState(this._card, this._config);
 }
 
 class _DetailPageState extends State<DetailPage> {
   final ModelCard _card;
-  EndPoint _endPoint;
+  final HashMap<String, dynamic> _config;
 
   final appBarHeight = 156.0;
   final POSTER_RATIO = 0.7;
@@ -33,29 +32,14 @@ class _DetailPageState extends State<DetailPage> {
 
 //  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  _DetailPageState(this._card, this._endPoint);
+  _DetailPageState(this._card, this._config);
 
   Future<Null> editAttributes() async {
-//    void onSubmit(String result) {
-//      print(result);
-//    }
-//    var dialog=Dialog_chooseOne(onSubmit:onSubmit, options:ModelCard.members);
-//
-//    var response=await showDialog<List>(
-//        context: context,
-//        builder: (BuildContext context) => dialog
-//    );
-//
-//    print (response!=null? response[0]: 'No hay respuesta');
 
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EditDetailsPage(this._endPoint)),
-    );
-
-    setState(() {
-      this._endPoint = appData.getCurrEndPoint();
-    });
+//    final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditDetailsPage( getEndPoint() )) );
+//    setState(() {
+//      var _endPoint = appData.getCurrEndPoint();
+//    });
   }
 
   @override
@@ -63,21 +47,35 @@ class _DetailPageState extends State<DetailPage> {
     this.theme= Theme.of(context);
     this.textTheme= Theme.of(context).textTheme;
 
+    List<Widget>allWidgets=[
+      posterAndTitleBlock(),
+      separator(),
+    ];
+
+    var d=descWidget();
+    if (d!=null){
+      allWidgets.add(d);
+      allWidgets.add(separator());
+    }
+
+    var s=secondaryFieldsWidget();
+    if (s!=null){
+      allWidgets.add(s);
+      allWidgets.add(separator());
+    }
+
+    var p=photoScroller();
+    if (p!=null){
+      allWidgets.add(p);
+      allWidgets.add(separator());
+    }
+
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           appBar(),
           SliverList(
-            delegate:
-                new SliverChildListDelegate(<Widget>[
-                  posterAndTitleBlock(),
-
-                  separator(),
-                  descWidget(),
-
-                  separator(),
-                  secondaryFieldsWidget(),
-                ]),
+            delegate:new SliverChildListDelegate(allWidgets),
           ),
         ],
       ),
@@ -85,10 +83,15 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget appBar() {
+    var ep=getEndPoint();
+    var src=_card.get(ep.secondImage() );
+    var domImage=src!=''?Image.network(src, fit: BoxFit.cover, height: appBarHeight, color: Colors.white.withOpacity(0.55),colorBlendMode: BlendMode.lighten,):Container();
+
     return SliverAppBar(
       pinned: false,
       leading: IconButton(
           icon: Icon(Icons.close),
+          color:Theme.of(context).accentColor,
           onPressed: () {
             Navigator.pop(context, 'Nope!');
           }),
@@ -97,29 +100,31 @@ class _DetailPageState extends State<DetailPage> {
       floating: false,// snap: true,
       // floating: true, snap: true,
 
-      flexibleSpace: new FlexibleSpaceBar(
-        background: Image.network(
-          _card.get(this._endPoint.imgField),
-          fit: BoxFit.cover,
-          height: appBarHeight,
-          color: Colors.white.withOpacity(0.55),
-          colorBlendMode: BlendMode.lighten,
-        ),
-      ),
-      actions: <Widget>[
-        new IconButton(
-            icon: const Icon(Icons.edit),
-            tooltip: 'Edit',
-            onPressed: () {
-              this.editAttributes();
-            }),
-      ],
+      flexibleSpace: new FlexibleSpaceBar(background: domImage,),
+//      actions: <Widget>[
+//        new IconButton(
+//            icon: const Icon(Icons.edit),
+//            tooltip: 'Edit',
+//            onPressed: () {
+//              this.editAttributes();
+//            }),
+//      ],
     );
   }
 
+  EndPoint getEndPoint(){
+    return this._config["ep"];
+  }
+  navigateImagePage(String url, BuildContext context){
+    Navigator.push(context, new MaterialPageRoute(
+      builder: (BuildContext context) => new ImagePage(url:url),
+    ));
+  }
+
   Widget posterAndTitleBlock() {
-    var src = _card.get(this._endPoint.imgField);
-    var name = _card.get(this._endPoint.nameField);
+    var ep=getEndPoint();
+    var src=_card.get(ep.firstImage());
+    var name = _card.get(ep.name);
 
     return Stack(children: [
       Padding(padding: const EdgeInsets.only(bottom: 200.0)),
@@ -143,10 +148,14 @@ class _DetailPageState extends State<DetailPage> {
   }
   Widget _titleLeftBlock(url, {double height}) {
     var width = POSTER_RATIO * height;
-    return Material(
-      borderRadius: BorderRadius.circular(4.0),
-      elevation: 5.0,
-      child: Image.network(url, fit: BoxFit.cover, width: width, height: height,),
+
+    var domImage=url!=''?Image.network(url, fit: BoxFit.cover, width: width, height: height,):Container();
+
+    return GestureDetector(
+        child:Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: domImage),
+        onTap: () {
+          navigateImagePage(url, context);
+        },
     );
   }
   Widget _titleRightBlock(name) {
@@ -167,10 +176,11 @@ class _DetailPageState extends State<DetailPage> {
         )
     );
   }
+
   Widget _stats(){
     var ret=<Widget>[];
 
-    var listaAtr=["toughness", "power", "cmc"];
+    var listaAtr=getEndPoint().stats;
 
     var themeBold=textTheme.headline.copyWith(fontWeight: FontWeight.w400, color: theme.accentColor,);
     var themeSoft = textTheme.caption.copyWith(color: Colors.black45);
@@ -179,7 +189,7 @@ class _DetailPageState extends State<DetailPage> {
       if (i>0) ret.add( SizedBox(width: 16.0) );
 
       var att=listaAtr[i];
-      var value=_card.get(att).toString();
+      var value=beautifulNumber( _card.get(att) );
 
       var numericRating = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,21 +203,65 @@ class _DetailPageState extends State<DetailPage> {
 
       ret.add(numericRating);
     }
-    return Row(crossAxisAlignment: CrossAxisAlignment.end, children: ret);
+
+    return SizedBox.fromSize(
+        size: const Size.fromHeight(50.0),
+        child: ListView.builder(
+          itemCount: ret.length,
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(top: 0.0, left: 0.0),
+          itemBuilder: (BuildContext, index) => ret[index],
+        )
+    );//Row(crossAxisAlignment: CrossAxisAlignment.end, children: ret);
   }
+  beautifulNumber(value){
+    try{
+      if (value.runtimeType.toString()=='int'){
+        //pass
+      }
+      else{
+        value=double.parse(value.toString());
+      }
+    } catch (e){
+      return value.toString();
+    }
+    if (value>1000000){
+      return (value/1000000).toString().substring(0,3) +"M";
+    }
+    else if (value>1000){
+     return (value/1000).toString().substring(0,3) +"K";
+    }
+    else if (value>100)
+      return value.round().toString().substring(0,3);
+    else{
+      var t=value.round().toString();
+      return t.substring(0, min(3, t.length) );
+    }
+  }
+
   Widget _chips(){
-//    var ret=<Widget>[];
     var ret=<String>[];
 
-    var chipsAttr=['types', "subtypes"];
+    if (getEndPoint().tags==null)
+      return Container();
+
+    var chipsAttr=getEndPoint().tags;
 
     for (var i=0; i<chipsAttr.length; i++){
       var fieldName=chipsAttr[i];
       var values=_card.get(fieldName);
 
-      for (var j=0; j<values.length; j++) {
-        var value=values[j];
-        ret.add(value);
+      if (values==null){
+        //pass
+      }
+      else if (values.runtimeType.toString()=='String'){
+        ret.add(values);
+      }
+      else {
+        for (var j=0; j<values.length; j++) {
+          var value=values[j];
+          ret.add(value);
+        }
       }
     }
 
@@ -221,7 +275,6 @@ class _DetailPageState extends State<DetailPage> {
         )
     );
   }
-
   Widget _buildChip(String value) {
     return Padding(
         padding: const EdgeInsets.only(right: 8.0),
@@ -243,7 +296,11 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget descWidget(){
-    var value=_card.get("text");
+    var value=_card.get( getEndPoint().text );
+
+    if (value==null)
+      return null;
+
     var valueStyle=textTheme.body1.copyWith(color: Colors.black45, fontSize: 16.0, );
     var moreStyle= textTheme.body1.copyWith(fontSize: 16.0, color: theme.accentColor);
 
@@ -268,29 +325,96 @@ class _DetailPageState extends State<DetailPage> {
         )
     );
   }
-  Widget mainFieldsWidget(){
-    var pri = <Widget>[];
-    for (String attr in this._endPoint.mainFields){
-      pri.add(
-        new WidgetCategoryItem(lines: <String>[_card.get(attr), attr],),
-      );
-    }
-    return new WidgetCategory(icon: Icons.event_note, children: pri);
-  }
+
   Widget secondaryFieldsWidget() {
     var sec = <Widget>[];
 
-    for (String attr in this._endPoint.secondaryFields) {
-      sec.add(
-        new WidgetCategoryItem(
-          lines: <String>[_card.get(attr), attr],
-        ),
-      );
+    for (int i=0; i<getEndPoint().fields.length; i++) {
+      var attr=getEndPoint().fields[i];
+      var value=_card.get(attr);
+
+      if (value==null){
+        continue;
+      }
+      else if (value.runtimeType.toString()=='List<dynamic>')
+        value=value[0];
+
+      try{
+        sec.add(
+          new WidgetCategoryItem(
+            lines: <String>[value, attr],
+          ),
+        );
+      } catch(e, s){
+//        sec.add( new WidgetCategoryItem(
+//          lines: <String>["Error", attr],
+//        ),);
+      //pass
+      }
     }
 
-//    ret.add(new WidgetCategory(icon: Icons.event_note, children: pri));
+    if (sec.length==0)
+      return null;
     return new WidgetCategory(icon: Icons.edit_attributes, children: sec);
   }
+
+  Widget photoScroller(){
+    var ret=<String>[];
+
+    var images=getEndPoint().images;
+
+    if (images==null || images.length<2)
+      return null;
+
+    for (var i=0; i<images.length; i++){
+      var fieldName=images[i];
+      var values=_card.get(fieldName);
+
+      if (values==null){
+        //pass
+      }
+      else if (values.runtimeType.toString()=='String'){
+        ret.add(values);
+      }
+      else {
+        for (var j=0; j<values.length; j++) {
+          var value=values[j];
+          ret.add(value);
+        }
+      }
+    }
+    return SizedBox.fromSize(
+        size: const Size.fromHeight(140.0),
+        child: ListView.builder(
+          itemCount: ret.length,
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(top: 8.0, left: 20.0),
+          itemBuilder: (BuildContext, index) => _buildPhotoScrollerItem(ret[ret.length-1-index]),
+        )
+    );
+  }
+  _buildPhotoScrollerItem(url){
+    var height=180.0;
+    var width = POSTER_RATIO * height;
+
+    if (url=='') return null;
+
+    var el=Padding(
+      padding: const EdgeInsets.only(right: 16.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4.0),
+        child: Image.network(url, width: 160.0, height: 120.0, fit: BoxFit.cover,),
+      ),
+    );
+
+    return GestureDetector(
+      child:el,
+      onTap: () {
+        navigateImagePage(url, context);
+      },
+    );
+  }
+
 
   void _showSnackbar(String text, BuildContext xcontext) {
     final snackBar =

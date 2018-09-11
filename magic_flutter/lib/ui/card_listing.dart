@@ -1,5 +1,6 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
-import 'package:magic_flutter/app_data.dart';
 import 'package:magic_flutter/models/end_point.dart';
 import 'package:magic_flutter/models/model_card.dart';
 import 'package:magic_flutter/ui/card_details.dart';
@@ -8,28 +9,37 @@ import 'package:magic_flutter/ui/config.dart';
 
 enum Mode { list, grid }
 
-class CardListingPage extends StatefulWidget {
-  CardListingPage({Key key, this.title}) : super(key: key);
-  final String title;
+class CardListing extends StatefulWidget {
+  final HashMap<String, dynamic> _config;
+
+  const CardListing(this._config);
 
   @override
-  _CardListingPageState createState() => new _CardListingPageState(Mode.grid);
+  _CardListingState createState() => new _CardListingState(Mode.grid, this._config);
 }
 
-class _CardListingPageState extends State<CardListingPage> {
+class _CardListingState extends State<CardListing> {
+  final HashMap<String, dynamic> _config;
+
   GlobalKey<ScaffoldState> _scaffoldKey = null;
 
   EndPoint ep;
-  var _cards = <ModelCard>[];
   Mode mode;
   bool modeChangedAtRunTime = false;
 
-  _CardListingPageState(this.mode);
+  _CardListingState(this.mode, this._config);
+
+  EndPoint getEndPoint(){
+    return this._config["ep"];
+  }
+  epCards(){
+    return getEndPoint().cards;
+  }
 
   @override
   Widget build(BuildContext context) {
     this._scaffoldKey = new GlobalKey<ScaffoldState>();
-    ep = appData.getCurrEndPoint();
+    ep = getEndPoint();
 
     return new Scaffold(
       key: this._scaffoldKey,
@@ -39,42 +49,53 @@ class _CardListingPageState extends State<CardListingPage> {
   }
 
   _buildAppBar(BuildContext context) {
-    return new AppBar(title: new Text(widget.title), actions: <Widget>[
-      IconButton(
-        icon:
-            Icon(this.mode == Mode.list ? Icons.view_module : Icons.view_list),
-        onPressed: () {
-          setState(() {
-            if (this.mode == Mode.list)
-              this.mode = Mode.grid;
-            else
-              this.mode = Mode.list;
+    return new AppBar(
+        title: new Text(ep.endpointTitle),
 
-            modeChangedAtRunTime = true;
-          });
-        },
-      ),
-      IconButton(
-        icon: const Icon(Icons.settings),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Config()),
-          );
-        },
-      ),
+        actions: <Widget>[
+          IconButton(
+            icon:
+                Icon(this.mode == Mode.list ? Icons.view_module : Icons.view_list),
+            onPressed: () {
+              setState(() {
+                if (this.mode == Mode.list)
+                  this.mode = Mode.grid;
+                else
+                  this.mode = Mode.list;
+
+                modeChangedAtRunTime = true;
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.pushNamed(context, '/config');
+
+//              setState(() {
+//                var ep=getEndPoint();
+//                _cards.clear();
+//              });
+
+
+            },
+          ),
     ]);
   }
 
   _buildBody(BuildContext context) {
-    if (this._cards.length > 0) {
+    var _cards=epCards();
+
+    if (_cards.length > 0) {
       return _buildGridOrList(context);
     } else {
+      var ep=getEndPoint();
+
       return FutureBuilder<List<ModelCard>>(
-          future: fetchPost(appData.getCurrEndPoint()),
+          future: fetchPost(ep),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              this._cards = snapshot.data;
+              ep.cards = snapshot.data;
               return _buildGridOrList(context);
             } else if (snapshot.hasError) {
               return Text("${snapshot.error}");
@@ -94,6 +115,8 @@ class _CardListingPageState extends State<CardListingPage> {
   }
 
   _buildList(BuildContext context) {
+    var _cards=epCards();
+
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemCount: (_cards.length * 2) - 1,
@@ -104,13 +127,14 @@ class _CardListingPageState extends State<CardListingPage> {
             return _buildRow(_cards[index ~/ 2], context);
         });
   }
-
   _buildRow(ModelCard card, BuildContext context) {
+    var txt=card.get(this.ep.name);
+    if (txt==null){
+      txt="Campo no informado: ${this.ep.name}";
+    }
+
     return ListTile(
-      title: Text(
-        card.get(ep.nameField),
-        style: Theme.of(context).textTheme.title,
-      ),
+      title: Text(txt, style: Theme.of(context).textTheme.title,),
       trailing: Icon(
         Icons.panorama_fish_eye,
         color: Theme.of(context).primaryColor,
@@ -124,6 +148,7 @@ class _CardListingPageState extends State<CardListingPage> {
   }
 
   _buildGrid(BuildContext context) {
+    var _cards=epCards();
     return new GridView.builder(
         primary: true,
         padding: const EdgeInsets.all(0.0),
@@ -133,13 +158,19 @@ class _CardListingPageState extends State<CardListingPage> {
           return _buildGridItem(_cards[index], context);
         });
   }
-
   _buildGridItem(ModelCard card, BuildContext context) {
-    var src=card.get(this.ep.imgField);
-    var txt=card.get(this.ep.nameField);
+    var fi=card.get(this.ep.firstImage());
+    var src=(fi!=null?fi:'');
+
+    var txt=card.get(this.ep.name);
+    if (txt==null){
+      txt="Campo no informado: ${this.ep.name}";
+    }
+
+    var domImg=src==''?Container() :Image.network(src, fit: BoxFit.contain);
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = theme.textTheme.title;
+//    final TextStyle textStyle = theme.textTheme.title;
 
     var domcard=new Card(
         elevation: 0.5,
@@ -153,7 +184,7 @@ class _CardListingPageState extends State<CardListingPage> {
                   height: 155.0,
                   child:new Stack(
                     children: <Widget>[
-                      new Positioned.fill(child: Image.network(src, fit: BoxFit.contain), bottom:10.0,),
+                      new Positioned.fill(child:domImg, bottom:10.0,),
 
                     ],
                   )
@@ -175,11 +206,11 @@ class _CardListingPageState extends State<CardListingPage> {
   }
 
   _navigateDetailPage(ModelCard card, BuildContext context) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => DetailPage(card, appData.getCurrEndPoint())),
-    );
+//    Navigator.pushNamed(context, '/detail');//no se puede usar pushNamed porque no recibe ningún otro parámetro
+
+    Navigator.push(context, new MaterialPageRoute(
+      builder: (BuildContext context) => new DetailPage(card, this._config),
+    ));
   }
 
   void _showSnackbar(String text) {
