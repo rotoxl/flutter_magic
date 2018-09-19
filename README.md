@@ -8,8 +8,7 @@
 ![Details](screenshots/detail.png)
 
 # Next steps
-* startup
-	* choose last used EndPoint
+* welcome screen
 * analytics
 * cupertino style?
 * detail window
@@ -19,20 +18,23 @@
 	* search 
 * change API endpoint window
 	* add more (bundled) API endpoints
-		* https://www.googleapis.com/books/v1/volumes?q=reilly
 		* Planets API
 	* "add new endpoint" logic & form
 * detailconfig window
 	* new chips, stats widgets, new fields are still not configurable
 
 # Recently added
+* startup
+	* choose last used EndPoint
 * "about this API" dialog
-* icon, splash & startup
+* icon, splash
 * list page
 	* toggle view list/grid
+	* gridWithText, gridWithoutText styles
 * config/change API screen
 	* "change endpoint" to choose from a list of bundled & user API endpoints (recently used first)
-	* show color/change color 
+	* show color
+	* added google books API
 * detail window
 	* open main image
 	* images widget
