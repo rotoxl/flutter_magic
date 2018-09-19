@@ -25,7 +25,7 @@ dependencies:
   photo_view: ^0.0.8
   url_launcher: ^3.0.3
 #  firebase_analytics: ^0.3.3
-  after_layout: ^1.0.4
+#  after_layout: ^1.0.4
 
 
 
