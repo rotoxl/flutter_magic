@@ -1,12 +1,9 @@
-import 'dart:collection';
-
 import 'package:app/models/end_point.dart';
 import 'package:app/ui/app_data_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:app/app_data.dart';
-import 'package:app/ui/card_details.dart';
 import 'package:app/ui/card_listing.dart';
 import 'package:app/ui/config.dart';
 
@@ -22,11 +19,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp>{
-  HashMap<String, dynamic> _config = new HashMap<String, dynamic>();
-
   AppData appData;
-
-  bool _updated;
 
   @override
   Widget build(BuildContext context) {
@@ -63,46 +56,55 @@ class _MyAppState extends State<MyApp>{
   void themeUpdater(AppData newappData) {
     setState(() {
       this.appData=newappData;
+
+      var ep=this.appData!=null?this.appData.getCurrEndPoint():null;
+      if (ep!=null)
+        appData.themeApplied=ep.theme!=null? ep.theme: ep.color;
     });
   }
   ThemeData get theme{
-    EndPoint ep=null;
+    EndPoint ep;
     if (this.appData!=null && this.appData.getCurrEndPoint()!=null)
       ep=this.appData.getCurrEndPoint();
 
-    return new ThemeData(
-      brightness: Brightness.light,
-      primarySwatch: ep==null?Colors.indigo: ep.color,
-      platform: Theme.of(context).platform,
-    );
+    if (ep!=null && ep.theme!=null){
+      return ep.theme;
+    }
+    else {
+      return new ThemeData(
+        brightness: Brightness.light,
+        primarySwatch: ep==null?Colors.indigo: ep.color,
+        platform: Theme.of(context).platform,
+      );
+    }
   }
 
   Route<dynamic> _getRoute(RouteSettings settings) {
     // Routes, by convention, are split on slashes, like filesystem paths.
     final List<String> path = settings.name.split('/');
     // We only support paths that start with a slash, so bail if
-    // the first component is not empty:
+    // the first component is not emfpty:
     if (path[0] != '')
       return null;
 
-    // If the path is "/stock:..." then show a stock page for the
-    // specified stock symbol.
-    if (path[1].startsWith('details:')) {
-      // We don't yet support subpages of a stock, so bail if there's
-      // any more path components.
-      if (path.length != 2)
-        return null;
-      // Extract the symbol part of "stock:..." and return a route
-      // for that symbol.
-      final String symbol = path[1].substring(6);
-
-      //TODO get card
-      var _card=null;
-      return new MaterialPageRoute<void>(
-        settings: settings,
-        builder: (BuildContext context) => new DetailPage(_card),
-      );
-    }
+//    // If the path is "/stock:..." then show a stock page for the
+//    // specified stock symbol.
+//    if (path[1].startsWith('details:')) {
+//      // We don't yet support subpages of a stock, so bail if there's
+//      // any more path components.
+//      if (path.length != 2)
+//        return null;
+//      // Extract the symbol part of "stock:..." and return a route
+//      // for that symbol.
+//      final String symbol = path[1].substring(6);
+//
+//      //TODO get card
+//      var _card=null;
+//      return new MaterialPageRoute<void>(
+//        settings: settings,
+//        builder: (BuildContext context) => new DetailPage(_card),
+//      );
+//    }
     // The other paths we support are in the routes table.
     return null;
   }

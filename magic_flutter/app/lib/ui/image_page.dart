@@ -17,11 +17,13 @@ class ImagePage extends StatelessWidget {
 
   imageView(BuildContext context) {
     double screenHeight=MediaQuery.of(context).size.height - 120.0;
+    double screenWidth=MediaQuery.of(context).size.width;//- 120.0;
+
     return new Container(
         child: new PhotoView(
-          size:Size.fromHeight(screenHeight),
+          size:Size.fromHeight(screenWidth),
           imageProvider: NetworkImage(url),
-          minScale: PhotoViewComputedScale.contained * 0.8,
+          minScale: PhotoViewComputedScale.contained * 0.3,
           maxScale: 3.0,
         )
     );

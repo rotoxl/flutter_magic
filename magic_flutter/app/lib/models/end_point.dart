@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:app/models/model_card.dart';
 
 enum TypeOfListing{list, gridWithoutName, gridWithName}
-enum TypeOfDetail{detailsPage, match, productCompare}
+enum TypeOfDetail{
+  detailsPage,
+  match,
+  productCompare,
+  heroPage //https://www.uplabs.com/posts/lonely-planet-hp-destination-selector
+}
 
 class EndPoint{
   TypeOfListing typeOfListing=TypeOfListing.gridWithName;
@@ -26,9 +31,10 @@ class EndPoint{
   Map<String, String> headers;
 
   String aboutDoc, aboutWeb, aboutInfo, aboutLogo;
-  Color color;
 
-  EndPoint({this.endpointTitle, this.endpointUrl, this.color});
+  Color color; ThemeData theme;
+
+  EndPoint({this.endpointTitle, this.endpointUrl, this.color, this.theme});
 
   List<String> allFields(){
     //TODO dynamically load fields from 1st query

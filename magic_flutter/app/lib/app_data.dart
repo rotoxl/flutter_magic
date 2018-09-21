@@ -6,10 +6,35 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app/models/end_point.dart';
 
+enum MColors{
+  red,
+  pink,
+  purple,
+  deepPurple,
+  indigo,
+  blue,
+  lightBlue,
+  cyan,
+  teal,
+  green,
+  lightGreen,
+  lime,
+  yellow,
+  amber,
+  orange,
+  deepOrange,
+  brown,
+  // The grey swatch is intentionally omitted because when picking a color
+  // randomly from this list to colorize an application, picking grey suddenly
+  // makes the app look disabled.
+  blueGrey,
+}
 
 class AppData{
   HashMap<String, EndPoint> _endPoints=HashMap<String, EndPoint>();
   String _fixedEndPoint;
+
+  Object themeApplied;
 
   EndPoint getEndPoint(String id) {
     if (_endPoints.length>0)
@@ -26,6 +51,10 @@ class AppData{
     if (_fixedEndPoint==null){
       loadEndPoints();
     }
+
+    if (_fixedEndPoint!=null && !this._endPoints.containsKey(_fixedEndPoint))
+      _fixedEndPoint=this._endPoints.keys.toList()[0];
+
     return getEndPoint(_fixedEndPoint);
   }
   void setCurrEndPoint(String id){
@@ -33,7 +62,7 @@ class AppData{
     saveLastUsed();
   }
 
-  String _loadMagicEP(){/*
+  _loadMagicEP(){/*
     {"name":"Adorable Kitten","manaCost":"{W}","cmc":1,"colors":["White"],"colorIdentity":["W"],"type":"Host Creature — Cat","types":["Host","Creature"],"subtypes":["Cat"],"rarity":"Common","set":"UST","setName":"Unstable","text":"When this creature enters the battlefield, roll a six-sided die. You gain life equal to the result.","artist":"Andrea Radeck","number":"1","power":"1","toughness":"1","layout":"normal","multiverseid":439390,"imageUrl":"http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=439390&type=card","rulings":[{"date":"2018-01-19","text":"Host creatures each have an ability that triggers when it enters the battlefield. It functions like any other creature."}],"printings":["UST"],"originalText":"When this creature enters the battlefield, roll a six-sided die. You gain life equal to the result.","originalType":"Host Creature — Cat","id":"95ebdf85f4ea74d584dfdfb72e3de5001d0748a9"}
     */
     var magic=EndPoint(endpointTitle:'Magic: The Gathering', endpointUrl:'https://api.magicthegathering.io/v1/cards', color:Colors.orange);
@@ -53,7 +82,7 @@ class AppData{
     _endPoints[magic.endpointTitle]=magic;
     return magic.endpointTitle;
   }
-  String _loadCountriesEP(){/*
+  _loadCountriesEP(){/*
     {"name":"Spain","topLevelDomain":[".es"],"alpha2Code":"ES","alpha3Code":"ESP","callingCodes":["34"],"capital":"Madrid","altSpellings":["ES","Kingdom of Spain","Reino de España"],"region":"Europe","subregion":"Southern Europe","population":46438422,"latlng":[40.0,-4.0],"demonym":"Spanish","area":505992.0,"gini":34.7,"timezones":["UTC","UTC+01:00"],"borders":["AND","FRA","GIB","PRT","MAR"],"nativeName":"España","numericCode":"724","currencies":[{"code":"EUR","name":"Euro","symbol":"€"}],"languages":[{"iso639_1":"es","iso639_2":"spa","name":"Spanish","nativeName":"Español"}],"translations":{"de":"Spanien","es":"España","fr":"Espagne","ja":"スペイン","it":"Spagna","br":"Espanha","pt":"Espanha","nl":"Spanje","hr":"Španjolska","fa":"اسپانیا"},"flag":"https://restcountries.eu/data/esp.svg","regionalBlocs":[{"acronym":"EU","name":"European Union","otherAcronyms":[],"otherNames":[]}],"cioc":"ESP"}
     */
     var countries=EndPoint(endpointTitle:'Rest Countries', endpointUrl:'https://restcountries.eu/rest/v2/all', color:Colors.indigo);
@@ -73,7 +102,7 @@ class AppData{
     _endPoints[countries.endpointTitle]=countries;
     return countries.endpointTitle;
   }
-  String _loadFightersEP(){/*
+  _loadFightersEP(){/*
     Fighters http://ufc-data-api.ufc.com/api/v3/iphone/fighters
     {"id":241895,"nickname":null,"wins":20,"statid":1194,"losses":1,"last_name":"Cyborg","weight_class":"Women_Featherweight","title_holder":true,"draws":0,"first_name":"Cris","fighter_status":"Active","rank":"C","pound_for_pound_rank":"11","thumbnail":"http://imagec.ufc.com/http%253A%252F%252Fmedia.ufc.tv%252Fgenerated_images_sorted%252FFighter%252FCris-Cyborg%252FCris-Cyborg_241895_medium_thumbnail.jpg?w640-h320-tc1","belt_thumbnail":"http://imagec.ufc.com/http%253A%252F%252Fmedia.ufc.tv%252Ffighter_images%252FCris_Cyborg%252FCYBORG_CRIS_L-CHAMP-PRINT.png?w600-h600-tc1","left_full_body_image":"http://imagec.ufc.com/http%253A%252F%252Fmedia.ufc.tv%252Ffighter_images%252FCris_Cyborg%252FCYBORG_CRIS_L.png?mh530","right_full_body_image":"http://imagec.ufc.com/http%253A%252F%252Fmedia.ufc.tv%252Ffighter_images%252FCris_Cyborg%252FCYBORG_CRIS_L.png?mh530","profile_image":"http://imagec.ufc.com/http%253A%252F%252Fmedia.ufc.tv%252Ffighter_images%252FCris_Cyborg%252FCYBORG_CRIS.png?w600-h600-tc1","link":"http://www.ufc.com/fighter/Cris-Cyborg"},
     */
@@ -94,7 +123,7 @@ class AppData{
     _endPoints[fighters.endpointTitle]=fighters;
     return fighters.endpointTitle;
   }
-  String _loadTrendingMoviesEP(){/*
+  _loadTrendingMoviesEP(){/*
     Movies https://api.themoviedb.org/3/trending/all/day?api_key=a2f45e3ad3af96b2ec9d0542adbfd1da&region=ES
     docs:  https://developers.themoviedb.org/3/movies/get-popular-movies
 
@@ -135,7 +164,7 @@ class AppData{
     _endPoints[trendingMovies.endpointTitle]=trendingMovies;
     return trendingMovies.endpointTitle;
   }
-  String _loadZomatoRestaurantsEP(){/*
+  _loadZomatoRestaurantsEP(){/*
     https://developers.zomato.com/api/v2.1/search?entity_id=280&entity_type=city
     > user-key: ab6e490707b8f2f51c864618f1ad90f4
     {
@@ -207,7 +236,7 @@ class AppData{
     _endPoints[zomato.endpointTitle]=zomato;
     return zomato.endpointTitle;
   }
-  String _loadBooksEP(){
+  _loadBooksEP(){
     var books=new EndPoint(endpointTitle:'Google Books', endpointUrl:'https://www.googleapis.com/books/v1/volumes?q=rock%20school%20drums', color:Colors.brown);
     books.headers=null;
     books.id='id'; books.name='{volumeInfo/title}'; books.text='{searchInfo/textSnippet}';
@@ -229,18 +258,146 @@ class AppData{
     return books.endpointTitle;
 
   }
+  _loadPlanetsAPI(){
+    /*https://api.myjson.com/bins/133s70 --> https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json
+    {
+     "id": 1,
+    "name": "Mercury",
+    "mass": "0.33",
+    "diameter": 4879,
+    "density": 5427,
+    "gravity": "3.7",
+    "rotation_period": "1407.6",
+    "length_of_day": "4222.6",
+    "distance_from_sun": "57.9",
+    "orbital_period": "88.0",
+    "orbital_velocity": "47.4",
+    "mean_temperature": 167,
+    "number_of_moons": 0,
+    "created_at": "2017-11-12T22:46:36.587Z",
+    "updated_at": "2017-11-12T22:46:36.587Z",
+    "img": "https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/mercury.jpg"
+    }*/
+
+
+  var theme=ThemeData.dark().copyWith(
+    accentColor: Colors.grey[800],
+    buttonColor: Colors.grey[800],
+  );
+
+
+  var planets=new EndPoint(endpointTitle:'Solar system (Compare)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json', theme:theme );
+    planets.color=Colors.black;
+
+    planets.headers=null;
+    planets.id='id'; planets.name='name'; planets.text=null;
+    planets.fields=['number_of_moons', 'mass', 'diameter', 'density', 'gravity', 'mean_temperature', ];
+
+    planets.images=['img', 'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg'];
+    planets.type='Bundled';
+
+    planets.aboutWeb='https://github.com/rotoxl/flutter_magic/blob/master/aboutPlanetsAPI.md';
+//    planets.aboutDoc='https://developers.google.com/books/docs/v1/reference/';
+    planets.aboutInfo='Planets in our Solar System';
+    planets.aboutLogo='https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg';
+
+    planets.typeOfListing=TypeOfListing.gridWithoutName;
+    planets.typeOfDetail=TypeOfDetail.productCompare;
+
+    _endPoints[planets.endpointTitle]=planets;
+
+
+  /*----------------*/
+    var planetsHero=new EndPoint(endpointTitle:'Solar system (Hero)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json', theme:theme );
+    planetsHero.color=Colors.black;
+
+    planetsHero.headers=null;
+    planetsHero.id='id'; planetsHero.name='name'; planetsHero.text=null;
+    planetsHero.fields=['number_of_moons', 'mass', 'diameter', 'density', 'gravity', 'mean_temperature', ];
+
+    planetsHero.images=['img', 'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg'];
+    planetsHero.type='Bundled';
+
+    planetsHero.aboutWeb='https://github.com/rotoxl/flutter_magic/blob/master/aboutPlanetsAPI.md';
+//    planets.aboutDoc='https://developers.google.com/books/docs/v1/reference/';
+    planetsHero.aboutInfo='Planets in our Solar System';
+    planetsHero.aboutLogo='https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg';
+
+    planetsHero.typeOfListing=TypeOfListing.gridWithName;
+    planetsHero.typeOfDetail=TypeOfDetail.heroPage;
+
+    _endPoints[planetsHero.endpointTitle]=planetsHero;
+
+  /*----------------*/
+    var planetsDetail=new EndPoint(endpointTitle:'Solar system (Detail)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json', theme:theme );
+    planetsDetail.color=Colors.black;
+
+    planetsDetail.headers=null;
+    planetsDetail.id='id'; planetsDetail.name='name'; planetsDetail.text=null;
+    planetsDetail.stats=['number_of_moons', 'mass'];
+    planetsDetail.fields=['diameter', 'density', 'gravity', 'mean_temperature', 'orbital_velocity', 'orbital_period'];
+
+    planetsDetail.images=['img'];
+    planetsDetail.type='Bundled';
+
+    planetsDetail.aboutWeb='https://github.com/rotoxl/flutter_magic/blob/master/aboutPlanetsAPI.md';
+//    planets.aboutDoc='https://developers.google.com/books/docs/v1/reference/';
+    planetsDetail.aboutInfo='Planets in our Solar System';
+    planetsDetail.aboutLogo='https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg';
+
+    planetsDetail.typeOfListing=TypeOfListing.gridWithoutName;
+    planetsDetail.typeOfDetail=TypeOfDetail.detailsPage;
+
+    _endPoints[planetsDetail.endpointTitle]=planetsDetail;
+
+
+
+
+    return planets.endpointTitle;
+
+  }
+  _loadPlacesAPI(){
+    /*https://api.myjson.com/bins/12c6d8 --> https://s3-eu-west-1.amazonaws.com/api-explorer-app/places/placesAPI.json
+    {src, author, place}*/
+
+
+    var theme=ThemeData.dark().copyWith(
+      accentColor: Colors.grey[800],
+      buttonColor: Colors.grey[800],
+    );
+
+
+    var places=new EndPoint(endpointTitle:'Places', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/places/placesAPI.json', theme:theme );
+    places.color=Colors.green;
+
+    places.id='src'; places.name='author'; places.text='place';
+
+    places.images=['src'];
+    places.type='Bundled';
+
+    places.aboutWeb='https://unsplash.com/';
+    places.aboutInfo='Download free (do whatever you want) high-resolution photos';
+
+    places.typeOfListing=TypeOfListing.gridWithoutName;
+    places.typeOfDetail=TypeOfDetail.heroPage;
+
+    _endPoints[places.endpointTitle]=places;
+    return places.endpointTitle;
+
+  }
 
   Future<HashMap<String, EndPoint>> loadEndPoints() async {
     print ('loadEndPoints');
 
     //bundled APIs (from https://github.com/toddmotto/public-apis)
-    var fixed;
     _loadMagicEP();
     _loadCountriesEP();
     _loadFightersEP();
     _loadTrendingMoviesEP();
     _loadZomatoRestaurantsEP();
     _loadBooksEP();
+    _loadPlanetsAPI();
+    _loadPlacesAPI();
 
     //load from storage: bundled APIs are overwritten by these
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -282,6 +439,7 @@ class AppData{
   Future<bool> saveLastUsed() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("last_endpoint", this.getCurrEndPoint().endpointTitle);
+    return true;
   }
 
 

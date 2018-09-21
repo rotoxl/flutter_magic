@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:math';
 
 import 'package:app/app_data.dart';
@@ -13,30 +12,29 @@ import 'package:app/ui/widgets.dart';
 
 class DetailPage extends StatefulWidget {
   final ModelCard _card;
+  ModelCard _cardToCompare;
 
   DetailPage(this._card, {Key key}) : super(key: key);
+  DetailPage.compare(this._card, this._cardToCompare, {Key key}) : super(key: key);
 
   @override
-  _DetailPageState createState() => new _DetailPageState(this._card);
+  _DetailPageState createState() => new _DetailPageState(this._card, this._cardToCompare);
 }
 
 class _DetailPageState extends State<DetailPage> {
   final ModelCard _card;
+  final ModelCard _cardToCompare;
 
   final appBarHeight = 156.0;
   final POSTER_RATIO = 0.7;
+  final POSTER_HEIGHT= 180.0;
 
   ThemeData theme;
   TextTheme textTheme;
 
-  _DetailPageState(this._card);
+  _DetailPageState(this._card, this._cardToCompare);
 
   Future<Null> editAttributes() async {
-
-//    final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditDetailsPage( getEndPoint() )) );
-//    setState(() {
-//      var _endPoint = appData.getCurrEndPoint();
-//    });
   }
 
   @override
@@ -44,27 +42,34 @@ class _DetailPageState extends State<DetailPage> {
     this.theme= Theme.of(context);
     this.textTheme= Theme.of(context).textTheme;
 
-    List<Widget>allWidgets=[
-      posterAndTitleBlock(),
-      separator(),
-    ];
+    var ep=getEndPoint();
+    List<Widget>allWidgets=new List<Widget>();
 
-    var d=descWidget();
-    if (d!=null){
-      allWidgets.add(d);
-      allWidgets.add(separator());
-    }
+    if (ep.typeOfDetail==TypeOfDetail.detailsPage){
+      allWidgets.addAll([posterAndTitleBlock(), separator(),]);
 
-    var s=secondaryFieldsWidget();
-    if (s!=null){
-      allWidgets.add(s);
-      allWidgets.add(separator());
-    }
+      var d=descWidget();
+      if (d!=null) allWidgets.addAll([d, separator()]);
 
-    var p=photoScroller();
-    if (p!=null){
-      allWidgets.add(p);
-      allWidgets.add(separator());
+      var s=secondaryFieldsWidget(_card);
+      if (s!=null) allWidgets.addAll([s, separator()]);
+
+      var p=photoScroller();
+      if (p!=null) allWidgets.addAll([p, separator()]);
+
+    } else if (ep.typeOfDetail==TypeOfDetail.productCompare){
+
+      allWidgets.addAll([
+          sidebyside( posterWName(_card, true), posterWName(_cardToCompare, false) ),
+          separator(),
+      ]);
+
+      allWidgets.addAll([
+        compareFields(),
+        separator(),
+      ]);
+    } else if (ep.typeOfDetail==TypeOfDetail.heroPage){
+      return heroPage();
     }
 
     return Scaffold(
@@ -79,12 +84,55 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
+  Widget heroPage(){
+    var ep=getEndPoint();
+    var src=_card.get(ep.firstImage());
+
+    var subheadStyle=Theme.of(context).textTheme.subhead.copyWith(color: Colors.white);
+    var headStyle=Theme.of(context).textTheme.title.copyWith(color: Colors.white);
+
+    var name=_card.get(ep.name);
+    var text=_card.get(ep.text);
+
+    var ret=new Container(
+      color: ep.theme.canvasColor,
+      child:new Container(
+        decoration: new BoxDecoration(
+          image: new DecorationImage(image: new Image.network(src ).image, fit: BoxFit.fitWidth),
+        ),
+        child: new Stack(children: <Widget>[
+          new Positioned(
+            bottom: 40.0, left: 16.0, right: 16.0,
+            child: Column(
+              children: <Widget>[
+                name==null?Container(): new Text(_card.get(ep.name), style:headStyle, textAlign: TextAlign.center,),
+                new Container(height: 10.0,),
+                text==null?Container(): new Text(text, style:subheadStyle, textAlign: TextAlign.center)
+              ],),),
+        ],)
+      )
+    );
+
+    return new GestureDetector(child: ret, onTap: () => Navigator.pop(context, 'Nope!'),);
+  }
+  valueForField(value) {
+    if (value == null)
+      return null;
+    else if (value.runtimeType.toString() == 'List<dynamic>')
+      return value[0];
+    else
+      return value;
+  }
   Widget appBar() {
     var ep=getEndPoint();
+
+    if (ep.typeOfDetail==TypeOfDetail.heroPage)
+      return Container();
+
     var src=_card.get(ep.secondImage() );
 
     if (src==null || src=='') src=_card.getImgPlaceholder();
-    var domImage=src!=''?Image.network(src, fit: BoxFit.cover, height: appBarHeight, color: Colors.white.withOpacity(0.55),colorBlendMode: BlendMode.lighten,):Container();
+    var domImage=src!=''?Image.network(src, fit: BoxFit.cover, height: appBarHeight, color: Colors.white.withOpacity(0.15),colorBlendMode: BlendMode.lighten,):Container();
 
     return SliverAppBar(
       pinned: false,
@@ -95,11 +143,11 @@ class _DetailPageState extends State<DetailPage> {
             Navigator.pop(context, 'Nope!');
           }),
       expandedHeight: appBarHeight,
-
+      elevation: 1.0,
       floating: false,// snap: true,
       // floating: true, snap: true,
 
-      flexibleSpace: new FlexibleSpaceBar(background: domImage,),
+      flexibleSpace: new FlexibleSpaceBar(background: domImage),
 //      actions: <Widget>[
 //        new IconButton(
 //            icon: const Icon(Icons.edit),
@@ -109,6 +157,56 @@ class _DetailPageState extends State<DetailPage> {
 //            }),
 //      ],
     );
+  }
+
+  Widget compareFields() {
+    final ThemeData themeData = Theme.of(context);
+
+    var subheadStyle=Theme.of(context).textTheme.subhead;
+    var caption=themeData.textTheme.caption;
+
+    List<Widget>sec = new List<Widget>();
+
+    for (int i = 0; i < getEndPoint().fields.length; i++) {
+      var attr = getEndPoint().fields[i];
+      var att_text = beautifulAttr(attr);
+
+      var value1 = beautifulNumber( valueForField(_card.get(attr)).toString() );
+      var value2 = beautifulNumber( valueForField(_cardToCompare.get(attr)).toString() );
+
+      sec.add(
+        new Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          child: new Row(
+            children: <Widget>[
+              new Expanded(child:new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    new Text(value1,   textAlign: TextAlign.left, style: subheadStyle),
+                  ]
+                ),
+              ),
+              new Expanded(child:new Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    new Text(att_text, textAlign: TextAlign.left, style: caption,),
+                  ],
+                ),
+              ),
+              new Expanded(child:new Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    new Text(value2),
+                    new Text(' ', style: themeData.textTheme.caption,),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      );
+    }
+    return new Container(child: Column(children: sec,),);
   }
 
   EndPoint getEndPoint(){
@@ -137,7 +235,7 @@ class _DetailPageState extends State<DetailPage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _titleLeftBlock(src, height: 180.0, altImage:_card.getImgPlaceholder()),
+            _titleLeftBlock(src, altImage:_card.getImgPlaceholder()),
             SizedBox(width: 16.0),
             _titleRightBlock(name),
           ],
@@ -146,14 +244,16 @@ class _DetailPageState extends State<DetailPage> {
 
     ]);
   }
-  Widget _titleLeftBlock(url, {double height, String altImage}) {
-    var width = POSTER_RATIO * height;
+  Widget _titleLeftBlock(String url, {String altImage}) {
+    var width = POSTER_RATIO * POSTER_HEIGHT;
 
     if (url==null || url=='') url=altImage;
-    var domImage=Image.network(url, fit: BoxFit.cover, width: width, height: height,);
+
+    var doesNotWantsBox=(url.endsWith('.png'));//assume it's transparent --> no border
+    var domImage=Image.network(url, fit: doesNotWantsBox?BoxFit.contain:BoxFit.cover, width: width, height: POSTER_HEIGHT,);
 
     return GestureDetector(
-        child:Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: domImage),
+        child:doesNotWantsBox? domImage: Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: domImage),
         onTap: () {
           if (url!=altImage)
             navigateImagePage(url, context);
@@ -167,7 +267,7 @@ class _DetailPageState extends State<DetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name, style: textTheme.headline,),
+            Text(name, style: textTheme.headline, maxLines: 3, overflow: TextOverflow.ellipsis,),
 
             SizedBox(height: 8.0),
             _stats(),
@@ -179,20 +279,61 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
+  Widget sidebyside(Widget left, Widget right){
+    return Stack(children: [
+      Padding(padding: const EdgeInsets.only(bottom: 220.0)),
+      Positioned(
+        bottom: 0.0, left: 16.0, right: 16.0,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            left,
+            Expanded(child:Container()),
+            right,
+          ],
+        ),
+      )
+    ]);
+  }
+  Widget posterWName(ModelCard newcard, bool isLeft){
+    var ep=getEndPoint();
+
+    var url=newcard.get(ep.firstImage());
+    var name = newcard.get(ep.name);
+
+    var themeSoft = textTheme.headline;
+
+    var width = POSTER_RATIO * POSTER_HEIGHT;
+
+    if (url==null || url=='') url=_card.getImgPlaceholder();
+
+    var doesNotWantsBox=(url.endsWith('.png'));//assume it's transparent --> no border
+    var domImage=new Image.network(url, fit: doesNotWantsBox?BoxFit.scaleDown: BoxFit.cover, width: width, height: POSTER_HEIGHT,);
+
+    return new Column(
+      crossAxisAlignment: isLeft?CrossAxisAlignment.start:CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        doesNotWantsBox? domImage: Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: domImage),
+        SizedBox(height: 8.0),
+        Text(name, style: themeSoft, textAlign: TextAlign.center),
+     ]
+    );
+  }
+
   Widget _stats(){
     var ret=<Widget>[];
 
     var listaAtr=getEndPoint().stats;
 
-    var themeBold=textTheme.headline.copyWith(fontWeight: FontWeight.w400, color: theme.accentColor,);
-    var themeSoft = textTheme.caption.copyWith(color: Colors.black45);
+    var themeBold=textTheme.headline.copyWith(fontWeight: FontWeight.w400, color: theme.textTheme.caption.decorationColor,);
+    var themeSoft = textTheme.caption.copyWith(color: theme.textTheme.caption.decorationColor);
 
     for (var i=0; i<listaAtr.length; i++){
       if (i>0) ret.add( SizedBox(width: 16.0) );
 
       var att=listaAtr[i];
-
-
       var att_text=beautifulAttr(att);
 
       var value=beautifulNumber( _card.get(att) );
@@ -224,7 +365,7 @@ class _DetailPageState extends State<DetailPage> {
     var ret=att;
 
     do{
-      var sep=null;
+      var sep;
       if (ret.indexOf('/')>-1){
         sep='/';
       } else if (ret.indexOf('_')>-1){
@@ -373,12 +514,14 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
-  Widget secondaryFieldsWidget() {
+  Widget secondaryFieldsWidget(ModelCard newcard) {
     var sec = <Widget>[];
 
     for (int i=0; i<getEndPoint().fields.length; i++) {
       var attr=getEndPoint().fields[i];
-      var value=_card.get(attr);
+      var att_text=beautifulAttr(attr);
+
+      var value=newcard.get(attr);
 
       if (value==null){
         continue;
@@ -389,7 +532,7 @@ class _DetailPageState extends State<DetailPage> {
       try{
         sec.add(
           new WidgetCategoryItem(
-            lines: <String>[value, attr],
+            lines: <String>[value, att_text],
           ),
         );
       } catch(e, s){
@@ -441,8 +584,8 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
   _buildPhotoScrollerItem(url){
-    var height=180.0;
-    var width = POSTER_RATIO * height;
+//    var height=180.0;
+//    var width = POSTER_RATIO * height;
 
     if (url=='') return null;
 

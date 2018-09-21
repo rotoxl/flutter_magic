@@ -36,7 +36,7 @@ class AboutAPIPage {
   }
 
   Widget _getDom(BuildContext context){
-    final ThemeData theme = Theme.of(context);
+//    final ThemeData theme = Theme.of(context);
 
     var txt=Text(this.ep.aboutInfo, softWrap:true, style:this.aboutStyle, overflow: TextOverflow.ellipsis, maxLines: 3,);
 
@@ -75,6 +75,7 @@ class AboutAPIPage {
         contentPadding: const EdgeInsets.all(0.0),
         children: <Widget>[
           new Container(
+              color:Colors.white,
               child:Column(
                 children: <Widget>[
                   fl1,
@@ -82,6 +83,7 @@ class AboutAPIPage {
               )
           ),
           new Container(
+              color:Colors.white,
               padding:EdgeInsets.symmetric(horizontal: 0.0, vertical:4.0,),
 //              color:Colors.red,
               child:Column(

@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:app/ui/card_listing.dart';
 import 'package:flutter/material.dart';
 import 'package:app/app_data.dart';
@@ -40,6 +38,7 @@ class _ConfigPageState extends State<ConfigPage> {
   }
   _buildList(BuildContext context) {
     var _endpoints=appData.endPoints().values.toList();
+    _endpoints.sort((EndPoint a, EndPoint b) => a.endpointUrl.compareTo(b.endpointUrl) );
 
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
@@ -62,13 +61,13 @@ class _ConfigPageState extends State<ConfigPage> {
       onTap: () {
         appData.setCurrEndPoint(ep.endpointTitle);
 
-//        if (widget._themeUpdater != null)
-//          widget._themeUpdater(appData);//para forzar el tema
+        //Navigator.pushReplacement leaves back arrow
 
-        Navigator.pushReplacement(context,
-            new MaterialPageRoute(builder: (BuildContext context){
-              return new CardListing(widget._themeUpdater);
-        }));
+//        Navigator.pushReplacement(context,
+//            new MaterialPageRoute(builder: (BuildContext context){
+//              return new CardListing(widget._themeUpdater);
+//        }));
+        Navigator.pop(context);
       },
     );
   }

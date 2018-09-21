@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:app/app_data.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:app/models/end_point.dart';
@@ -32,7 +33,7 @@ class ModelCard{
       camposEncontrados=cacheExpresiones[expression];
       for (var i=0; i<camposEncontrados.length; i++){
         String field=camposEncontrados[i];
-        String mod=null;
+        String mod;
         var newvalue;
 
         if (field.indexOf('||')>-1){// campo||alternativa
@@ -67,7 +68,7 @@ class ModelCard{
           } catch(e){
             return null;
           }
-        } else {
+        } else{
           newvalue=json[field];
         }
 
@@ -86,7 +87,13 @@ class ModelCard{
       return ret.trim();
 
     } else {
-      return json[expression];
+      var newvalue;
+      if (json.containsKey(expression))
+        newvalue=json[expression];
+      else
+        newvalue=expression;//es un literal, un valor fijo: {valor}
+
+      return newvalue;
     }
   }
   ModelCard({this.id});
@@ -106,8 +113,20 @@ class ModelCard{
 Future<List<ModelCard>> fetchPost(EndPoint ep) async {
   print ('Querying ${ep.endpointUrl}');
 
-  final response = await http.get(ep.endpointUrl, headers:ep.headers);
+  var cardsToRecycle=null;
+  //If same url has already being downloaded in another, related, endpoint --> lets recycle it
+  appData.endPoints().forEach((String key, EndPoint value){
+       if (value.endpointUrl==ep.endpointUrl){
+         if (value.cards!=null && value.cards.length>0){
+           print ('recycled!');
+           cardsToRecycle=value.cards;
+         }
+       }
+  });
+  if (cardsToRecycle!=null)
+    return cardsToRecycle;
 
+  final response = await http.get(ep.endpointUrl, headers:ep.headers);
   if (response.statusCode == 200) {
     // If the call to the server was successful, parse the JSON
     var jsonData=json.decode(response.body);

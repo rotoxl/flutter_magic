@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:app/app_data.dart';
 import 'package:flutter/material.dart';
 import 'package:app/models/end_point.dart';
@@ -21,13 +19,14 @@ class CardListing extends StatefulWidget {
 }
 
 class _CardListingState extends State<CardListing> {
-//  final HashMap<String, dynamic> _config;
 
-  GlobalKey<ScaffoldState> _scaffoldKey = null;
+  GlobalKey<ScaffoldState> _scaffoldKey;
 
   EndPoint ep;
   Mode mode;
   bool modeChangedAtRunTime = false;
+
+  List<ModelCard> selectedCards=new List<ModelCard>();
 
   _CardListingState(this.mode);
 
@@ -94,15 +93,26 @@ class _CardListingState extends State<CardListing> {
           new AboutAPIPage(this.ep).customDialogShow(context);
           break;
       }
-
   }
-
-
 
   _buildBody(BuildContext context) {
     var _cards=epCards();
 
+    var setThemeIn10ms=(){
+      if (this.ep.theme!=null && appData.themeApplied==this.ep.theme)
+        return;
+      else if (this.ep.color!=null && appData.themeApplied==this.ep.color)
+        return;
+
+      new Future.delayed(const Duration(milliseconds: 10), (){
+        if (widget._themeUpdater!=null)
+          widget._themeUpdater(appData); //forzamos tema
+      });
+    };
+
     if (_cards.length > 0) {
+      setThemeIn10ms();
+
       return _buildGridOrList(context);
     } else {
       var ep=getEndPoint();
@@ -114,10 +124,7 @@ class _CardListingState extends State<CardListing> {
               ep.cards = snapshot.data;
 //              return _buildGridOrList(context);
 
-              new Future.delayed(const Duration(milliseconds: 10), (){
-                if (widget._themeUpdater!=null)
-                  widget._themeUpdater(appData); //forzamos tema
-              });
+              setThemeIn10ms();
 
               return Center(child: CircularProgressIndicator());
 
@@ -174,20 +181,23 @@ class _CardListingState extends State<CardListing> {
   _buildGrid(BuildContext context) {
     var _cards=epCards();
 
-    double verticalMargin=0.0;
-    if (this.ep.typeOfListing==TypeOfListing.gridWithoutName)
+    double verticalMargin=0.0, horizontalMargin=0.0;
+    if (this.ep.typeOfListing==TypeOfListing.gridWithoutName){
       verticalMargin=10.0;
+      horizontalMargin=3.0;
+    }
 
     return new OrientationBuilder(
         builder: (context, orientation) {
           return new GridView.count(
-              primary: true,
-              padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: verticalMargin),
-              mainAxisSpacing: verticalMargin,
-              crossAxisCount: (orientation == Orientation.portrait ? 2 : 3),
-              children: List.generate(_cards.length, (index) {
-                return _buildGridItem(_cards[index], context);
-              })
+                primary: true,
+                padding: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
+                mainAxisSpacing: verticalMargin,
+                childAspectRatio: 1.1,
+                crossAxisCount: (orientation == Orientation.portrait ? 2 : 3),
+                children: List.generate(_cards.length, (index) {
+                  return _buildGridItem(_cards[index], context);
+                })
           );
         }
     );
@@ -205,6 +215,8 @@ class _CardListingState extends State<CardListing> {
 
     Widget domcard, domImg, domTxt;
 
+    var isSelected=this.selectedCards.contains(card);
+
     if (this.ep.typeOfListing==TypeOfListing.gridWithName) {
       domImg = Image.network(src, fit: BoxFit.cover);
 
@@ -217,34 +229,68 @@ class _CardListingState extends State<CardListing> {
             overflow: TextOverflow.ellipsis,),
       );
 
-      domcard=new GridTile(
+      domcard=new Container(
+        color:isSelected?Theme.of(context).selectedRowColor:null,
+        child:new GridTile(
           child: domImg,
           footer:domTxt
+        )
       );
+
     } else if (this.ep.typeOfListing==TypeOfListing.gridWithoutName) {
 
       domImg = Image.network(src, fit: BoxFit.fitHeight);
-      domcard=new GridTile(
-        child: domImg,
+
+      domcard=new Container(
+        color:isSelected?Theme.of(context).accentColor:null,
+        child:new GridTile(child: domImg,),
       );
     }
 
     return new GestureDetector(
       child:domcard,
       onTap: () {
-        _navigateDetailPage(card, context);
+        if (this.ep.typeOfDetail==TypeOfDetail.productCompare)
+          _toggleSelection(card, context);
+        else
+          _navigateDetailPage(card, context);
       },
     );
 
   }
+  _toggleSelection(ModelCard card, BuildContext context){
+    var newSelectedCards=this.selectedCards.sublist(0);
 
-  _navigateDetailPage(ModelCard card, BuildContext context) async {
+    if (newSelectedCards.contains(card)){
+      newSelectedCards.remove(card);
+    } else{
+      newSelectedCards.add(card);
+    }
+
+    if (newSelectedCards.length>=2){
+      this.selectedCards.clear();
+      _navigateDetailPage(newSelectedCards[0], context, cardToCompare: card,);
+    } else {
+      setState(() {this.selectedCards=newSelectedCards;});
+    }
+  }
+  _navigateDetailPage(ModelCard card, BuildContext context, {ModelCard cardToCompare}) async {
 //    Navigator.pushNamed(context, '/detail');//no se puede usar pushNamed porque no recibe ningún otro parámetro
 
     Navigator.push(context, new MaterialPageRoute(
-      builder: (BuildContext context) => new DetailPage(card),
+      builder: (BuildContext context){
+        if (ep.typeOfDetail==TypeOfDetail.productCompare){
+
+          return new DetailPage.compare(card, cardToCompare);
+
+        } else {
+          return new DetailPage(card);
+
+        }
+      }
     ));
   }
+
 
   void _showSnackbar(String text) {
     final snackBar =

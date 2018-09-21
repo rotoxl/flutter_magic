@@ -1,13 +1,10 @@
 import 'dart:collection';
 
-import 'package:after_layout/after_layout.dart';
 import 'package:app/ui/card_listing.dart';
 import 'package:app/ui/config.dart';
 import 'package:flutter/material.dart';
 import 'package:app/models/end_point.dart';
-import 'package:app/models/model_card.dart';
-import 'package:app/ui/about_api_page.dart';
-import 'package:app/ui/card_details.dart';
+
 import 'package:app/app_data.dart';
 
 class AppDataXLoader extends StatelessWidget{
@@ -55,6 +52,7 @@ class AppDataXLoader extends StatelessWidget{
           if (snapshot.hasData && this.loaded==false) {
             this.loaded=true;
             print('loaded!');
+
             new Future.delayed(const Duration(milliseconds: 10), ()=>_navigateNext(context, snapshot));
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
