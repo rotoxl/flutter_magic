@@ -17,7 +17,6 @@ class _ConfigPageState extends State<ConfigPage> {
 
   @override
   Widget build(BuildContext context) {
-    appData.logScreen("prueba log screen");
     this._scaffoldKey = new GlobalKey<ScaffoldState>();
 
     return new Scaffold(

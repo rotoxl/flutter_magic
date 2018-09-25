@@ -121,6 +121,7 @@ class _CardListingState extends State<CardListing> {
   _handleMenuTap(BuildContext context, MenuItems value) {
       switch (value) {
         case MenuItems.toggleGridList:
+          appData.logEvent('listing_toggleGridList', {'ep':ep.endpointTitle});
           setState(() {
             if (this.mode == Mode.list)
               this.mode = Mode.grid;
@@ -138,6 +139,8 @@ class _CardListingState extends State<CardListing> {
   }
 
   _buildBody(BuildContext context) {
+    appData.logEvent('listing_show', {'ep':ep.endpointTitle, 'typeOfListing':ep.typeOfListing});
+
     var _cards=epCards();
 
     var setThemeIn10ms=(){
