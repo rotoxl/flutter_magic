@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:app/app_data.dart';
 
 
 class ImagePage extends StatelessWidget {
@@ -19,8 +18,6 @@ class ImagePage extends StatelessWidget {
   imageView(BuildContext context) {
     double screenHeight=MediaQuery.of(context).size.height - 120.0;
     double screenWidth=MediaQuery.of(context).size.width;//- 120.0;
-
-    appData.logEvent('images_show', {'ep':appData.getCurrEndPoint().endpointTitle, 'image_src':url});
 
     return new Container(
         child: new PhotoView(
