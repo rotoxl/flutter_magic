@@ -1,8 +1,8 @@
 # Now in beta@Google Play 
 
-![https://play.google.com/store/apps/details?id=apiexplorer.com.app](screenshots/shop-android.png) https://play.google.com/store/apps/details?id=apiexplorer.com.app
+![https://play.google.com/store/apps/details?id=apiexplorer.com.app](screenshots/shop-android.png) 
 
-![](screenshots/diapo1.png)![](screenshots/diapo2.png)![](screenshots/diapo3.png)![](screenshots/diapo4.png)
+![](screenshots/diapo1.png)![](screenshots/diapo2.png)    ![](screenshots/diapo3.png)![](screenshots/diapo4.png)
 
 
 # Magic API &amp; Flutter
