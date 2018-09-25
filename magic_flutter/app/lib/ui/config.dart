@@ -60,10 +60,21 @@ class _ConfigPageState extends State<ConfigPage> {
     return new GestureDetector(
       child:row,
       onTap: () {
+        var curr_ep=appData.getFixedEndPoint();
+
         appData.setCurrEndPoint(ep.endpointTitle);
 
         appData.logEvent('endpoint_select', {'title': ep.endpointTitle,});
-        Navigator.pop(context);
+
+        if (curr_ep==null){
+          Navigator.pushReplacement(context, new MaterialPageRoute(
+              builder: (BuildContext context){
+                return new CardListing(widget._themeUpdater);
+              }
+          ));
+        }
+        else
+          Navigator.pop(context);
       },
     );
   }

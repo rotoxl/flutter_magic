@@ -31,7 +31,7 @@ class AppDataXLoader extends StatelessWidget{
     if (current==null){
       Navigator.pushReplacement(context, new MaterialPageRoute(
         builder: (BuildContext context) {
-          return new ConfigPage(null);
+          return new ConfigPage(_themeUpdater);
           },
       ));
     }
