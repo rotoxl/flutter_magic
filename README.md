@@ -1,5 +1,11 @@
-# Magic API &amp; Flutter
+# Now in beta@Google Play 
 
+![https://play.google.com/store/apps/details?id=apiexplorer.com.app](screenshots/shop-android.png) https://play.google.com/store/apps/details?id=apiexplorer.com.app
+
+![](screenshots/diapo1.png)![](screenshots/diapo2.png)![](screenshots/diapo3.png)![](screenshots/diapo4.png)
+
+
+# Magic API &amp; Flutter
 
 * data is fetched from an API endpoint
 * data is shown in listing+detail
@@ -12,8 +18,6 @@
 * list page
 	* search (in results) & set query parameter
 * welcome screen
-* analytics
-	* add more and more
 * cupertino style?
 * detail window
 	* related items widget
@@ -25,6 +29,7 @@
 # Recently added
 * analytics
 	* basic scaffolding
+	* add more and more
 * startup
 	* choose last used EndPoint
 * "about this API" dialog
