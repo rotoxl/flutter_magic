@@ -9,19 +9,22 @@
 ![Structure](screenshots/composition.png)
 
 # Next steps
+* list page
+	* search (in results) & set query parameter
 * welcome screen
 * analytics
+	* add more and more
 * cupertino style?
 * detail window
 	* related items widget
-* list page
-	* search 
 * change API endpoint window
 	* "add new endpoint" logic & form
 * detailconfig window
 	* new chips, stats widgets, new fields are still not configurable
 
 # Recently added
+* analytics
+	* basic scaffolding
 * startup
 	* choose last used EndPoint
 * "about this API" dialog
