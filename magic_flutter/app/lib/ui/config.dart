@@ -17,6 +17,7 @@ class _ConfigPageState extends State<ConfigPage> {
 
   @override
   Widget build(BuildContext context) {
+    appData.logScreen("prueba log screen");
     this._scaffoldKey = new GlobalKey<ScaffoldState>();
 
     return new Scaffold(
@@ -32,7 +33,7 @@ class _ConfigPageState extends State<ConfigPage> {
           actions: <Widget>[
   //        IconButton(icon: const Icon(Icons.save),onPressed: () {appData.save();},),
   //        IconButton(icon: const Icon(Icons.folder_open),onPressed: () {print(appData.loadEndPoints());},),
-            IconButton(icon: const Icon(Icons.add), onPressed: () {this._showSnackbar('Not implemented yet');},),
+            IconButton(icon: const Icon(Icons.add), onPressed: () {this.endPointAdd();},),
           ]
       );
   }
@@ -61,17 +62,16 @@ class _ConfigPageState extends State<ConfigPage> {
       onTap: () {
         appData.setCurrEndPoint(ep.endpointTitle);
 
-        //Navigator.pushReplacement leaves back arrow
-
-//        Navigator.pushReplacement(context,
-//            new MaterialPageRoute(builder: (BuildContext context){
-//              return new CardListing(widget._themeUpdater);
-//        }));
+        appData.logEvent('endpoint_select', {'title': ep.endpointTitle,});
         Navigator.pop(context);
       },
     );
   }
 
+  void endPointAdd() async{
+    appData.logEvent('endpoint_add', {'err': 'not-implemented',});
+    this._showSnackbar('Not implemented yet');
+  }
   void _showSnackbar(String text){
     final snackBar = SnackBar(content: Text(text), duration: Duration(seconds: 3));
     this._scaffoldKey.currentState.showSnackBar(snackBar);

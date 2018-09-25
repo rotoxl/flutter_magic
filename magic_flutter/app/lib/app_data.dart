@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,6 +36,16 @@ class AppData{
   String _fixedEndPoint;
 
   Object themeApplied;
+
+  FirebaseAnalytics analytics;
+
+  Future<Null> logEvent(name, Map<String, dynamic> parameters) async{
+    await appData.analytics.logEvent(name: name, parameters:parameters);
+  }
+  Future<Null> logScreen(name) async{
+    await appData.analytics.setCurrentScreen(screenName: name);
+  }
+
 
   EndPoint getEndPoint(String id) {
     if (_endPoints.length>0)

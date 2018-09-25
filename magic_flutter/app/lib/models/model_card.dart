@@ -111,23 +111,14 @@ class ModelCard{
 }
 
 Future<List<ModelCard>> fetchPost(EndPoint ep) async {
-  print ('Querying ${ep.endpointUrl}');
+  var tCall=new DateTime.now();
 
-  var cardsToRecycle=null;
-  //If same url has already being downloaded in another, related, endpoint --> lets recycle it
-  appData.endPoints().forEach((String key, EndPoint value){
-       if (value.endpointUrl==ep.endpointUrl){
-         if (value.cards!=null && value.cards.length>0){
-           print ('recycled!');
-           cardsToRecycle=value.cards;
-         }
-       }
-  });
-  if (cardsToRecycle!=null)
-    return cardsToRecycle;
+  print ('Querying (${ep.endpointTitle}) --> ${ep.endpointUrl}');
 
   final response = await http.get(ep.endpointUrl, headers:ep.headers);
   if (response.statusCode == 200) {
+    var tResponse=new DateTime.now();
+
     // If the call to the server was successful, parse the JSON
     var jsonData=json.decode(response.body);
     var jsonCards;
@@ -157,6 +148,15 @@ Future<List<ModelCard>> fetchPost(EndPoint ep) async {
     for (var i=0; i<jsonCards.length; i++){
       cards.add( ModelCard.fromJson(jsonCards[i]) );
     }
+
+    var tProcessed=new DateTime.now();
+
+    appData.logEvent('endpoint_load', {
+      'title': ep.endpointTitle,
+      'time_to_load':tResponse.difference(tCall).inSeconds,
+      'time_to_proccess':tProcessed.difference(tResponse).inSeconds
+    });
+
     return cards;
   } else {
     // If that call was not successful, throw an error.

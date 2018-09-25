@@ -5,14 +5,22 @@ import 'package:app/models/model_card.dart';
 import 'package:app/ui/about_api_page.dart';
 import 'package:app/ui/card_details.dart';
 
-
 enum Mode { list, grid }
 enum MenuItems {toggleGridList, about}
 
 class CardListing extends StatefulWidget {
+  double offset = 0.0;
+
   void Function(AppData p) _themeUpdater;
 
   CardListing(void Function(AppData p) this._themeUpdater);
+
+  double getOffsetMethod() {
+    return offset;
+  }
+  void setOffsetMethod(double val) {
+    offset=val;
+  }
 
   @override
   _CardListingState createState() => new _CardListingState(Mode.grid);
@@ -26,6 +34,8 @@ class _CardListingState extends State<CardListing> {
   Mode mode;
   bool modeChangedAtRunTime = false;
 
+  ScrollController _scrollController;
+
   List<ModelCard> selectedCards=new List<ModelCard>();
 
   _CardListingState(this.mode);
@@ -34,7 +44,39 @@ class _CardListingState extends State<CardListing> {
     return appData.getCurrEndPoint();
   }
   epCards(){
-    return getEndPoint().cards;
+    if (getEndPoint().cards!=null && getEndPoint().cards.length>0){
+      return getEndPoint().cards;
+    } else {
+      //
+      var cardsToRecycle=null;
+      //If same url has already being downloaded in another, related, endpoint --> lets recycle it
+      appData.endPoints().forEach((String key, EndPoint value){
+        if (value.endpointUrl==ep.endpointUrl){
+          if (value.cards!=null && value.cards.length>0){
+            print ('recycled!');
+            cardsToRecycle=value.cards;
+          }
+        }
+      });
+      if (cardsToRecycle!=null)
+        return cardsToRecycle;
+      else
+        return [];
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = new ScrollController(
+        initialScrollOffset: widget.getOffsetMethod(),
+        keepScrollOffset: true,
+    );
+  }
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -148,15 +190,30 @@ class _CardListingState extends State<CardListing> {
   _buildList(BuildContext context) {
     var _cards=epCards();
 
-    return ListView.builder(
+    //prueba, a ver si lo coge
+    _scrollController = new ScrollController(
+      initialScrollOffset: widget.getOffsetMethod(),
+      keepScrollOffset: true,
+    );
+
+    return new NotificationListener(
+      child:ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemCount: (_cards.length * 2) - 1,
+        controller: _scrollController,
         itemBuilder: (context, index) {
           if (index.isOdd)
             return Divider();
           else
             return _buildRow(_cards[index ~/ 2], context);
-        });
+        }
+      ),
+      onNotification: (notification) {
+        if (notification is ScrollNotification) {
+          widget.setOffsetMethod(notification.metrics.pixels);
+        }
+      },
+    );
   }
   _buildRow(ModelCard card, BuildContext context) {
     var txt=card.get(this.ep.name);
@@ -187,17 +244,29 @@ class _CardListingState extends State<CardListing> {
       horizontalMargin=3.0;
     }
 
+    //prueba, a ver si lo coge
+    _scrollController = new ScrollController(
+      initialScrollOffset: widget.getOffsetMethod(),
+      keepScrollOffset: true,
+    );
+
     return new OrientationBuilder(
         builder: (context, orientation) {
-          return new GridView.count(
-                primary: true,
-                padding: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
-                mainAxisSpacing: verticalMargin,
-                childAspectRatio: 1.1,
-                crossAxisCount: (orientation == Orientation.portrait ? 2 : 3),
-                children: List.generate(_cards.length, (index) {
-                  return _buildGridItem(_cards[index], context);
-                })
+          return new NotificationListener(child:new GridView.count(
+              controller: _scrollController,
+              padding: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
+              mainAxisSpacing: verticalMargin,
+              childAspectRatio: 1.1,
+              crossAxisCount: (orientation == Orientation.portrait ? 2 : 3),
+              children: List.generate(_cards.length, (index) {
+                return _buildGridItem(_cards[index], context);
+              })
+          ),
+          onNotification: (notification) {
+            if (notification is ScrollNotification) {
+              widget.setOffsetMethod(notification.metrics.pixels);
+            }
+          }
           );
         }
     );

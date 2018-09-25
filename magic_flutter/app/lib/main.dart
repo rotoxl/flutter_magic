@@ -7,8 +7,8 @@ import 'package:app/app_data.dart';
 import 'package:app/ui/card_listing.dart';
 import 'package:app/ui/config.dart';
 
-//import 'package:firebase_analytics/firebase_analytics.dart';
-//import 'package:firebase_analytics/observer.dart';
+import 'package:firebase_analytics/observer.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 
 void main() => runApp(new MyApp());
@@ -23,12 +23,13 @@ class _MyAppState extends State<MyApp>{
 
   @override
   Widget build(BuildContext context) {
-//    FirebaseAnalytics analytics = new FirebaseAnalytics();
+    FirebaseAnalytics analytics = new FirebaseAnalytics();
+
     this.appData=appData;
 
     var routes=<String, WidgetBuilder>{
       '/':(BuildContext context){
-                      return new AppDataXLoader(themeUpdater);
+                      return new AppDataXLoader(themeUpdater, analytics);
                     },
       '/cardlisting':(BuildContext context){
                         return new CardListing(themeUpdater);
@@ -41,7 +42,7 @@ class _MyAppState extends State<MyApp>{
       title: 'API Explorer',
       theme: theme,
       navigatorObservers: [
-//        new FirebaseAnalyticsObserver(analytics: analytics),
+        new FirebaseAnalyticsObserver(analytics: analytics),
       ],
       routes: routes,
       onGenerateRoute: _getRoute,

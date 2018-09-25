@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:app/ui/card_listing.dart';
 import 'package:app/ui/config.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:app/models/end_point.dart';
 
@@ -11,10 +12,15 @@ class AppDataXLoader extends StatelessWidget{
   bool loaded=false;
   void Function(AppData p) _themeUpdater;
 
-  AppDataXLoader(void Function(AppData p) this._themeUpdater);
+  FirebaseAnalytics analytics;
+
+  AppDataXLoader(void Function(AppData p) this._themeUpdater, FirebaseAnalytics this.analytics);
 
   @override
   Widget build(BuildContext context) {
+    if (appData!=null)
+        appData.analytics=analytics;
+
     return new Scaffold(
       appBar: _buildAppBar(context),
       body: _buildBody(context),

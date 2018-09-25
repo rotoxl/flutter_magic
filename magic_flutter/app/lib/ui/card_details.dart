@@ -98,7 +98,7 @@ class _DetailPageState extends State<DetailPage> {
       color: ep.theme.canvasColor,
       child:new Container(
         decoration: new BoxDecoration(
-          image: new DecorationImage(image: new Image.network(src ).image, fit: BoxFit.fitWidth),
+          image: new DecorationImage(image: new Image.network(src ).image, fit: BoxFit.fitHeight),
         ),
         child: new Stack(children: <Widget>[
           new Positioned(
