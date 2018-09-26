@@ -15,16 +15,17 @@
 ![Structure](screenshots/composition.png)
 
 # Next steps
-* list page
-	* search (in results) & set query parameter
-* welcome screen
-* cupertino style?
-* detail window
-	* related items widget
-* change API endpoint window
-	* "add new endpoint" logic & form
-* detailconfig window
-	* new chips, stats widgets, new fields are still not configurable
+* sprint 1
+	* onboarding screen
+
+* sprint 2 
+	* list page -> set query parameter
+	* cupertino style?
+	* detail window -> related items widget
+	* change API endpoint window
+		* "add new endpoint" logic & form
+	* detailconfig window
+		* new chips, stats widgets, new fields are still not configurable
 
 # Recently added
 * analytics
@@ -35,6 +36,8 @@
 * "about this API" dialog
 * icon, splash
 * list page
+	* empty states
+	* list page -> search (in results)
 	* toggle view list/grid
 	* more styles: gridWithText, gridWithoutText
 * config/change API screen
