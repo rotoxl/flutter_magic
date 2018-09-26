@@ -1,4 +1,5 @@
 import 'package:app/app_data.dart';
+import 'package:app/ui/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:app/models/end_point.dart';
 import 'package:app/models/model_card.dart';
@@ -6,7 +7,7 @@ import 'package:app/ui/about_api_page.dart';
 import 'package:app/ui/card_details.dart';
 
 enum Mode { list, grid }
-enum MenuItems {toggleGridList, about}
+enum MenuItems {search, toggleGridList, about}
 
 class CardListing extends StatefulWidget {
   double offset = 0.0;
@@ -43,7 +44,7 @@ class _CardListingState extends State<CardListing> {
   EndPoint getEndPoint(){
     return appData.getCurrEndPoint();
   }
-  epCards(){
+  List<ModelCard> epCards(){
     if (getEndPoint().cards!=null && getEndPoint().cards.length>0){
       return getEndPoint().cards;
     } else {
@@ -105,7 +106,9 @@ class _CardListingState extends State<CardListing> {
 
             itemBuilder: (BuildContext context) => <PopupMenuItem<MenuItems>>[
 
+              new PopupMenuItem<MenuItems>(value: MenuItems.search, child: const Text('Search in results'),),
               new PopupMenuItem<MenuItems>(value: MenuItems.toggleGridList, child: const Text('Toggle list/grid mode'),),
+//              new PopupMenuDivider<MenuItems>(),
               new PopupMenuItem<MenuItems>(value: MenuItems.about, child: const Text('About this API'),),
 
             ],
@@ -113,7 +116,11 @@ class _CardListingState extends State<CardListing> {
     ]);
   }
   _handleSearch(){
-    this._showSnackbar("");
+    if (epCards().length>0){
+      Navigator.push(context, new MaterialPageRoute(
+          builder: (BuildContext context){return new SearchPage();}
+      ));
+    }
   }
   _navigateConfig(){
     Navigator.pushNamed(context, '/config');
@@ -135,11 +142,15 @@ class _CardListingState extends State<CardListing> {
         case MenuItems.about:
           new AboutAPIPage(this.ep).customDialogShow(context);
           break;
+
+        case MenuItems.search:
+          _handleSearch();
+          break;
       }
   }
 
   _buildBody(BuildContext context) {
-    appData.logEvent('listing_show', {'ep':ep.endpointTitle, 'typeOfListing':ep.typeOfListing});
+    appData.logEvent('listing_show', {'ep':ep.endpointTitle, 'typeOfListing':ep.typeOfListing.toString()} );
 
     var _cards=epCards();
 
@@ -174,7 +185,7 @@ class _CardListingState extends State<CardListing> {
               return Center(child: CircularProgressIndicator());
 
             } else if (snapshot.hasError) {
-              return Text("${snapshot.error}");
+              return _emptyState(snapshot.error);
             }
 
             // By default, show a loading spinner
@@ -363,7 +374,32 @@ class _CardListingState extends State<CardListing> {
     ));
   }
 
+  _emptyState(err){
+    var tt=Theme.of(context).textTheme;
 
+    var title='Unable to connect';
+    var subtitle="Maybe it's not you but we can't found the resource. Tap to try again.";
+
+    if (err.toString().contains('SocketException')){
+      return new GestureDetector(
+        onTap: (){
+          setState((){/*retry connection*/});
+        },
+        child:new Column(
+          children: <Widget>[
+              SizedBox(height: 100.0),
+              new Icon(Icons.cloud_off, color:Colors.black45, size: 90.0),
+
+              Text(title, style:tt.title),
+              SizedBox(height: 10.0),
+
+              new Container(padding:EdgeInsets.symmetric(horizontal: 16.0),
+                  child:Text(subtitle, style:tt.subhead, textAlign: TextAlign.center,)
+              )
+          ],)
+      );
+    }
+  }
   void _showSnackbar(String text) {
     final snackBar =
         SnackBar(content: Text(text), duration: Duration(seconds: 3));
