@@ -40,19 +40,18 @@ class AboutAPIPage {
 
     var txt=Text(this.ep.aboutInfo, softWrap:true, style:this.aboutStyle, overflow: TextOverflow.ellipsis, maxLines: 3,);
 
-    var col1, width;
+    var col1;
     if (this.ep.aboutLogo!=null){
       col1=Image.network(this.ep.aboutLogo, fit: BoxFit.cover, width: 100.0, height: 100.0);
-      width=180.0;
     }
     else{
-      col1=Container();
-      width=260.0;
+      col1=Container(constraints: BoxConstraints(minWidth:100.0, minHeight: 100.0),
+                    child: new Icon(Icons.info_outline, color:Colors.black45, size: 90.0) );
     }
 
     var col2=new Container(
       height: 100.0,
-      width: width,
+      width: 180.0,
       child: Padding(
           padding:EdgeInsets.symmetric(horizontal:8.0),
           child:Center(
@@ -105,7 +104,7 @@ class AboutAPIPage {
               mainAxisSize:MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                new Text(text, style: this.linkStyle,),
+                new Text(text, style: this.linkStyle, overflow: TextOverflow.ellipsis, ),
                 new Align(alignment:Alignment.bottomRight, child: Icon(Icons.chevron_right, color:Colors.black45))
               ]
           )
