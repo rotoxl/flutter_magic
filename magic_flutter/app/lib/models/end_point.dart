@@ -62,7 +62,7 @@ class EndPoint{
   }
 
   List<ModelCard> _cards=new List<ModelCard>();
-  get cards{
+  List<ModelCard> get cards{
     return _cards;
   }
   set cards(List<ModelCard>newcards){

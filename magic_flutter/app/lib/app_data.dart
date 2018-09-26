@@ -40,7 +40,7 @@ class AppData{
   FirebaseAnalytics analytics;
 
   Future<Null> logEvent(name, Map<String, dynamic> parameters) async{
-    await appData.analytics.logEvent(name: name, parameters:parameters);
+//    await appData.analytics.logEvent(name: name, /*parameters:parameters*/);
   }
   Future<Null> logScreen(name) async{
     await appData.analytics.setCurrentScreen(screenName: name);
@@ -96,13 +96,13 @@ class AppData{
   _loadCountriesEP(){/*
     {"name":"Spain","topLevelDomain":[".es"],"alpha2Code":"ES","alpha3Code":"ESP","callingCodes":["34"],"capital":"Madrid","altSpellings":["ES","Kingdom of Spain","Reino de España"],"region":"Europe","subregion":"Southern Europe","population":46438422,"latlng":[40.0,-4.0],"demonym":"Spanish","area":505992.0,"gini":34.7,"timezones":["UTC","UTC+01:00"],"borders":["AND","FRA","GIB","PRT","MAR"],"nativeName":"España","numericCode":"724","currencies":[{"code":"EUR","name":"Euro","symbol":"€"}],"languages":[{"iso639_1":"es","iso639_2":"spa","name":"Spanish","nativeName":"Español"}],"translations":{"de":"Spanien","es":"España","fr":"Espagne","ja":"スペイン","it":"Spagna","br":"Espanha","pt":"Espanha","nl":"Spanje","hr":"Španjolska","fa":"اسپانیا"},"flag":"https://restcountries.eu/data/esp.svg","regionalBlocs":[{"acronym":"EU","name":"European Union","otherAcronyms":[],"otherNames":[]}],"cioc":"ESP"}
     */
-    var countries=EndPoint(endpointTitle:'Rest Countries', endpointUrl:'https://restcountries.eu/rest/v2/all', color:Colors.indigo);
+    var countries=EndPoint(endpointTitle:'World Countries', endpointUrl:'https://restcountries.eu/rest/v2/all', color:Colors.indigo);
     countries.id='alpha3Code'; countries.name='name'; countries.text=null;
     countries.stats=['population', 'area'];
     countries.tags=['region', 'subregion'];
     countries.fields=['capital', 'currencies', 'topLevelDomain'];
     countries.related='borders'; //points to a different country by idField
-    countries.images=['https://raw.githubusercontent.com/djaiss/mapsicon/master/all/{alpha2Code|lower}/256.png', 'https://api.backendless.com/2F26DFBF-433C-51CC-FF56-830CEA93BF00/473FB5A9-D20E-8D3E-FF01-E93D9D780A00/files/CountryFlagsPng/{alpha3Code|lower}.png'];
+    countries.images=[/*'https://raw.githubusercontent.com/djaiss/mapsicon/master/all/{alpha2Code|lower}/256.png',*/ 'https://api.backendless.com/2F26DFBF-433C-51CC-FF56-830CEA93BF00/473FB5A9-D20E-8D3E-FF01-E93D9D780A00/files/CountryFlagsPng/{alpha3Code|lower}.png'];
     countries.type='Bundled';
 
     countries.aboutWeb='https://restcountries.eu/';

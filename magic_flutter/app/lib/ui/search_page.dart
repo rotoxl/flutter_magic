@@ -43,6 +43,8 @@ class _SearchPageState extends State<SearchPage> {
     String selectedID=selected.toString();
     var card=ep.cards.firstWhere((card)=>card.get(ep.id)==selectedID);
 
+    appData.logEvent('search_selectOne', {'ep':appData.getCurrEndPoint().endpointTitle});
+
     Navigator.push(context, new MaterialPageRoute(
         builder: (BuildContext context){
             return new DetailPage(card);
@@ -62,6 +64,7 @@ class _SearchPageState extends State<SearchPage> {
       return card.json.values.toList().toString().toLowerCase().contains(criteriaRE);
     });
 
+    appData.logEvent('search_search', {'ep':appData.getCurrEndPoint().endpointTitle, 'what':criteria, 'found':foundCards.length});
     return foundCards.toList();
   }
 

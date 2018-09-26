@@ -45,7 +45,7 @@ class _DetailPageState extends State<DetailPage> {
     var ep=getEndPoint();
     List<Widget>allWidgets=new List<Widget>();
 
-    appData.logEvent('detail_show', {'ep':ep.endpointTitle, 'typeOfDetail':ep.typeOfDetail, 'card':this._card.id, 'cardToCompare':this._cardToCompare!=null?this._cardToCompare.id:null} );
+    appData.logEvent('detail_show', {'ep':ep.endpointTitle, 'typeOfDetail':ep.typeOfDetail.toString(), 'card':this._card.id, 'cardToCompare':this._cardToCompare!=null?this._cardToCompare.id:null} );
 
     if (ep.typeOfDetail==TypeOfDetail.detailsPage){
       allWidgets.addAll([posterAndTitleBlock(), separator(),]);

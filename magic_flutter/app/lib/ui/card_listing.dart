@@ -380,8 +380,10 @@ class _CardListingState extends State<CardListing> {
     var title='Unable to connect';
     var subtitle="Maybe it's not you but we can't found the resource. Tap to try again.";
 
-    if (err.toString().contains('SocketException')){
-      return new GestureDetector(
+    appData.logEvent('listing_error', {'ep':appData.getCurrEndPoint().endpointTitle, 'err':err.toString()});
+
+//    if (err.toString().contains('SocketException')){
+    return new GestureDetector(
         onTap: (){
           setState((){/*retry connection*/});
         },
@@ -398,7 +400,7 @@ class _CardListingState extends State<CardListing> {
               )
           ],)
       );
-    }
+//    }
   }
   void _showSnackbar(String text) {
     final snackBar =
