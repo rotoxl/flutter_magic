@@ -122,19 +122,20 @@ Future<List<ModelCard>> fetchPost(EndPoint ep) async {
     // If the call to the server was successful, parse the JSON
     var jsonData=json.decode(response.body);
     var jsonCards;
+    var xtype=jsonData.runtimeType.toString();
 
-    if (jsonData.runtimeType.toString()=='List<dynamic>'){
+    if (xtype=='List<dynamic>' || xtype.endsWith('List<dynamic>') ){
       jsonCards=jsonData;
-
     } else {
+
       var keys=jsonData.keys.toList();
       String finalkey;
 
       for (var i=0; i<keys.length; i++){
         var key=keys[i];
         try{
-          var type=jsonData[ keys[i] ].runtimeType.toString();
-          if (type=='List<dynamic>'){
+          var type=jsonData[ key ].runtimeType.toString();
+          if (type=='List<dynamic>' || type.endsWith('List<dynamic>')){
             finalkey=key;
             break;
           }
@@ -154,7 +155,8 @@ Future<List<ModelCard>> fetchPost(EndPoint ep) async {
     appData.logEvent('endpoint_load', {
       'title': ep.endpointTitle,
       'time_to_load':tResponse.difference(tCall).inSeconds,
-      'time_to_proccess':tProcessed.difference(tResponse).inSeconds
+      'time_to_proccess':tProcessed.difference(tResponse).inSeconds,
+      'number_of_cards':cards.length,
     });
 
     return cards;
