@@ -43,33 +43,16 @@ class _DetailPageState extends State<DetailPage> {
     this.textTheme= Theme.of(context).textTheme;
 
     var ep=getEndPoint();
-    List<Widget>allWidgets=new List<Widget>();
 
     appData.logEvent('detail_show', {'ep':ep.endpointTitle, 'typeOfDetail':ep.typeOfDetail.toString(), 'card':this._card.id, 'cardToCompare':this._cardToCompare!=null?this._cardToCompare.id:null} );
 
+    List<Widget>allWidgets;
     if (ep.typeOfDetail==TypeOfDetail.detailsPage){
-      allWidgets.addAll([posterAndTitleBlock(), separator(),]);
-
-      var d=descWidget();
-      if (d!=null) allWidgets.addAll([d, separator()]);
-
-      var s=secondaryFieldsWidget(_card);
-      if (s!=null) allWidgets.addAll([s, separator()]);
-
-      var p=photoScroller();
-      if (p!=null) allWidgets.addAll([p, separator()]);
+      allWidgets=detailPage();
 
     } else if (ep.typeOfDetail==TypeOfDetail.productCompare){
+      allWidgets=comparePage();
 
-      allWidgets.addAll([
-          sidebyside( posterWName(_card, true), posterWName(_cardToCompare, false) ),
-          separator(),
-      ]);
-
-      allWidgets.addAll([
-        compareFields(),
-        separator(),
-      ]);
     } else if (ep.typeOfDetail==TypeOfDetail.heroPage){
       return heroPage();
     }
@@ -86,6 +69,34 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
+  List<Widget> detailPage(){
+    List<Widget>allWidgets=new List<Widget>();
+    allWidgets.addAll([posterAndTitleBlock(), separator(),]);
+
+    var d=descWidget();
+    if (d!=null) allWidgets.addAll([d, separator()]);
+
+    var s=secondaryFieldsWidget(_card);
+    if (s!=null) allWidgets.addAll([s, separator()]);
+
+    var p=photoScroller();
+    if (p!=null) allWidgets.addAll([p, separator()]);
+
+    return allWidgets;
+  }
+  List<Widget> comparePage(){
+    List<Widget>allWidgets=new List<Widget>();
+    allWidgets.addAll([
+      new Container(color:this.theme.canvasColor, child:sidebyside( posterWName(_card, true), posterWName(_cardToCompare, false) ) ),
+      separator(),
+    ]);
+
+    allWidgets.addAll([
+      compareFields(),
+      separator(),
+    ]);
+    return allWidgets;
+  }
   Widget heroPage(){
     var ep=getEndPoint();
     var src=_card.get(ep.firstImage());
@@ -117,6 +128,7 @@ class _DetailPageState extends State<DetailPage> {
 
     return new GestureDetector(child: ret, onTap: () => Navigator.pop(context, 'Nope!'),);
   }
+
   valueForField(value) {
     if (value == null)
       return null;
@@ -128,13 +140,16 @@ class _DetailPageState extends State<DetailPage> {
   Widget appBar() {
     var ep=getEndPoint();
 
-    if (ep.typeOfDetail==TypeOfDetail.heroPage)
-      return Container();
-
     var src=_card.get(ep.secondImage() );
-
     if (src==null || src=='') src=_card.getImgPlaceholder();
-    var domImage=src!=''?Image.network(src, fit: BoxFit.cover, height: appBarHeight, color: Colors.white.withOpacity(0.15),colorBlendMode: BlendMode.lighten,):Container();
+
+    var height=appBarHeight;
+    if (ep.typeOfDetail==TypeOfDetail.heroPage || ep.typeOfDetail==TypeOfDetail.productCompare){
+      src='';
+      height=16.0;
+    }
+
+    var domImage=src!=''?Image.network(src, fit: BoxFit.cover, height: height, color: Colors.white.withOpacity(0.15),colorBlendMode: BlendMode.lighten,):Container();
 
     return SliverAppBar(
       pinned: false,
@@ -144,7 +159,7 @@ class _DetailPageState extends State<DetailPage> {
           onPressed: () {
             Navigator.pop(context, 'Nope!');
           }),
-      expandedHeight: appBarHeight,
+      expandedHeight: height,
       elevation: 1.0,
       floating: false,// snap: true,
       // floating: true, snap: true,
