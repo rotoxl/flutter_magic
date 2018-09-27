@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/app_data.dart';
 import 'package:app/ui/search_page.dart';
 import 'package:flutter/material.dart';
@@ -106,8 +108,8 @@ class _CardListingState extends State<CardListing> {
               new PopupMenuItem<MenuItems>(value: MenuItems.search, child: const Text('Search in results'),),
               new PopupMenuItem<MenuItems>(value: MenuItems.toggleGridList, child: const Text('Toggle list/grid mode'),),
 
-              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:5.0, ),),
-              new PopupMenuItem<MenuItems>(value: MenuItems.viewSource, child: const Text('View source'),),
+//              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:1.0, ), height:5.0, ),
+//              new PopupMenuItem<MenuItems>(value: MenuItems.viewSource, child: const Text('View source'),),
 
               new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:5.0, ),),
               new PopupMenuItem<MenuItems>(value: MenuItems.about, child: const Text('About this API'),),
@@ -211,14 +213,14 @@ class _CardListingState extends State<CardListing> {
 
   _buildGridOrList(BuildContext context) {
     if (this.mode == Mode.list)
-      return _buildList(context);
+      return _buildList(context, _buildRow);
     else if (this.mode==Mode.source)
-      return _buildSource(context);
+      return _buildList(context, _buildSourceRow);
     else
       return _buildGrid(context);
   }
 
-  _buildList(BuildContext context) {
+  _buildList(BuildContext context, Function(ModelCard card, BuildContext context) fnBuildRow) {
     var _cards=epCards();
 
     //prueba, a ver si lo coge
@@ -236,7 +238,7 @@ class _CardListingState extends State<CardListing> {
           if (index.isOdd)
             return Divider();
           else
-            return _buildRow(_cards[index ~/ 2], context);
+            return fnBuildRow(_cards[index ~/ 2], context);
         }
       ),
       onNotification: (notification) {
@@ -265,50 +267,23 @@ class _CardListingState extends State<CardListing> {
       },
     );
   }
-
-  _buildSourceList(BuildContext context) {
-    var _cards=epCards();
-
-    //prueba, a ver si lo coge
-    _scrollController = new ScrollController(
-      initialScrollOffset: widget.getOffsetMethod(),
-      keepScrollOffset: true,
-    );
-
-    return new NotificationListener(
-      child:ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: (_cards.length * 2) - 1,
-          controller: _scrollController,
-          itemBuilder: (context, index) {
-            if (index.isOdd)
-              return Divider();
-            else
-              return _buildSourceRow(_cards[index ~/ 2], context);
-          }
-      ),
-      onNotification: (notification) {
-        if (notification is ScrollNotification) {
-          widget.setOffsetMethod(notification.metrics.pixels);
-        }
-      },
-    );
-  }
   _buildSourceRow(ModelCard card, BuildContext context) {
     var txt=card.get(this.ep.name);
     if (txt==null){
       txt="Not found: ${this.ep.name}";
     }
 
+    JsonEncoder encoder = new JsonEncoder.withIndent('  ');
+
+    var j=json.encode(card.json);
+    var pprint=( encoder.convert( json.decode(j) ) );
+
     return ListTile(
       title: Text(txt, style: Theme.of(context).textTheme.title,),
-      trailing: Icon(
-        Icons.panorama_fish_eye,
-        color: Theme.of(context).primaryColor,
-      ),
-      onTap: () {
+      subtitle: Text(pprint),
+      trailing: Icon(Icons.code, color: Theme.of(context).primaryColor,),
+      onTap:() {
 //        Scaffold.of(context).showSnackBar(SnackBar(content:Text(card.name)));
-
         _navigateDetailPage(card, context);
       },
     );
