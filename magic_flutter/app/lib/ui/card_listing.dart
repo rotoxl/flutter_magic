@@ -6,8 +6,8 @@ import 'package:app/models/model_card.dart';
 import 'package:app/ui/about_api_page.dart';
 import 'package:app/ui/card_details.dart';
 
-enum Mode { list, grid }
-enum MenuItems {search, toggleGridList, about}
+enum Mode { list, grid, source }
+enum MenuItems {search, toggleGridList, about, viewSource}
 
 class CardListing extends StatefulWidget {
   double offset = 0.0;
@@ -97,18 +97,19 @@ class _CardListingState extends State<CardListing> {
         title: new Text(ep.endpointTitle),
 
         actions: <Widget>[
-
-          new IconButton(icon: const Icon(Icons.settings), onPressed:_navigateConfig,),
-          //new IconButton(icon: const Icon(Icons.search), onPressed: _handleSearch, tooltip: 'Search',),
-
-          new PopupMenuButton<MenuItems>(
+          new IconButton(icon: const Icon(Icons.cloud), onPressed:_navigateConfig,),
+          new PopupMenuButton(
             onSelected: (MenuItems value) { _handleMenuTap(context, value); },
 
             itemBuilder: (BuildContext context) => <PopupMenuItem<MenuItems>>[
 
               new PopupMenuItem<MenuItems>(value: MenuItems.search, child: const Text('Search in results'),),
               new PopupMenuItem<MenuItems>(value: MenuItems.toggleGridList, child: const Text('Toggle list/grid mode'),),
-//              new PopupMenuDivider<MenuItems>(),
+
+              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:5.0, ),),
+              new PopupMenuItem<MenuItems>(value: MenuItems.viewSource, child: const Text('View source'),),
+
+              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:5.0, ),),
               new PopupMenuItem<MenuItems>(value: MenuItems.about, child: const Text('About this API'),),
 
             ],
@@ -145,6 +146,20 @@ class _CardListingState extends State<CardListing> {
 
         case MenuItems.search:
           _handleSearch();
+          break;
+
+        case MenuItems.viewSource:
+          setState(() {
+            if (this.mode == Mode.source){
+              if (ep.typeOfListing==TypeOfListing.list)
+                this.mode=Mode.list;
+              else
+                this.mode=Mode.grid;
+            }
+            else
+              this.mode = Mode.source;
+            modeChangedAtRunTime = true;
+          });
           break;
       }
   }
@@ -197,6 +212,8 @@ class _CardListingState extends State<CardListing> {
   _buildGridOrList(BuildContext context) {
     if (this.mode == Mode.list)
       return _buildList(context);
+    else if (this.mode==Mode.source)
+      return _buildSource(context);
     else
       return _buildGrid(context);
   }
@@ -230,6 +247,54 @@ class _CardListingState extends State<CardListing> {
     );
   }
   _buildRow(ModelCard card, BuildContext context) {
+    var txt=card.get(this.ep.name);
+    if (txt==null){
+      txt="Not found: ${this.ep.name}";
+    }
+
+    return ListTile(
+      title: Text(txt, style: Theme.of(context).textTheme.title,),
+      trailing: Icon(
+        Icons.panorama_fish_eye,
+        color: Theme.of(context).primaryColor,
+      ),
+      onTap: () {
+//        Scaffold.of(context).showSnackBar(SnackBar(content:Text(card.name)));
+
+        _navigateDetailPage(card, context);
+      },
+    );
+  }
+
+  _buildSourceList(BuildContext context) {
+    var _cards=epCards();
+
+    //prueba, a ver si lo coge
+    _scrollController = new ScrollController(
+      initialScrollOffset: widget.getOffsetMethod(),
+      keepScrollOffset: true,
+    );
+
+    return new NotificationListener(
+      child:ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          itemCount: (_cards.length * 2) - 1,
+          controller: _scrollController,
+          itemBuilder: (context, index) {
+            if (index.isOdd)
+              return Divider();
+            else
+              return _buildSourceRow(_cards[index ~/ 2], context);
+          }
+      ),
+      onNotification: (notification) {
+        if (notification is ScrollNotification) {
+          widget.setOffsetMethod(notification.metrics.pixels);
+        }
+      },
+    );
+  }
+  _buildSourceRow(ModelCard card, BuildContext context) {
     var txt=card.get(this.ep.name);
     if (txt==null){
       txt="Not found: ${this.ep.name}";
