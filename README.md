@@ -9,8 +9,8 @@
 
 * data is fetched from an API endpoint
 * data is shown in listing+detail
-* 3 flavours for listing (list, gridWithName, gridWithoutName)
-* 3 flavours for detail (hero, data, compare)
+* 4 flavours for listing (list, gridWithName, gridWithoutName, match)
+* 4 flavours for detail (hero, data, compare, match)
 
 ![Structure](screenshots/composition.png)
 
@@ -33,14 +33,16 @@
 	* add more and more
 * startup
 	* choose last used EndPoint
+	* remote config with firebase
 * "about this API" dialog
-* icon, splash
+* app icon & splash
 * list page
 	* empty states
 	* list page -> search (in results)
 	* toggle view list/grid
 	* more styles: gridWithText, gridWithoutText
 * config/change API screen
+	* firebase remote config support
 	* sorted by endpoint (so that same-domain endpoints are grouped together)
 	* "change endpoint" to choose from a list of bundled & user API endpoints (recently used first)
 	* show color
@@ -48,7 +50,7 @@
 	* added (static) Planets API in 3 flavours
 	* added (static) Places API
 * detail window
-	* more styles: heroStyle + compareStyle
+	* more templates: heroStyle + compareStyle + match
 	* poster photos are wiser now, if the image is a png it doesn't show a border
 	* open main image
 	* images widget
