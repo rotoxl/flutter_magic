@@ -2,7 +2,7 @@
 
 ![https://play.google.com/store/apps/details?id=apiexplorer.com.app](screenshots/shop-android.png) 
 
-![](screenshots/diapo1.png)![](screenshots/diapo2.png)    ![](screenshots/diapo3.png)![](screenshots/diapo4.png)
+![](screenshots/diapo-all.png)
 
 
 # Magic API &amp; Flutter
