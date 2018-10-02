@@ -111,7 +111,7 @@ class _CardListingState extends State<CardListing> {
 //              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:1.0, ), height:5.0, ),
 //              new PopupMenuItem<MenuItems>(value: MenuItems.viewSource, child: const Text('View source'),),
 
-              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:5.0, ),),
+              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:5.0, ), height:5.0, ),
               new PopupMenuItem<MenuItems>(value: MenuItems.about, child: const Text('About this API'),),
 
             ],
@@ -216,11 +216,15 @@ class _CardListingState extends State<CardListing> {
       return _buildList(context, _buildRow);
     else if (this.mode==Mode.source)
       return _buildList(context, _buildSourceRow);
-    else
-      return _buildGrid(context);
+    else{
+      if (this.ep.typeOfListing==TypeOfListing.match)
+        return _buildList(context, _buildRow);
+      else
+        return _buildGrid(context);
+    }
   }
 
-  _buildList(BuildContext context, Function(ModelCard card, BuildContext context) fnBuildRow) {
+  _buildList(BuildContext context, Function(ModelCard card, int index, BuildContext context) fnBuildRow) {
     var _cards=epCards();
 
     //prueba, a ver si lo coge
@@ -236,9 +240,9 @@ class _CardListingState extends State<CardListing> {
         controller: _scrollController,
         itemBuilder: (context, index) {
           if (index.isOdd)
-            return Divider();
+            return Divider(height:2.0);
           else
-            return fnBuildRow(_cards[index ~/ 2], context);
+            return fnBuildRow(_cards[index ~/ 2], index ~/ 2, context);
         }
       ),
       onNotification: (notification) {
@@ -248,29 +252,84 @@ class _CardListingState extends State<CardListing> {
       },
     );
   }
-  _buildRow(ModelCard card, BuildContext context) {
-    var txt=card.get(this.ep.name);
-    if (txt==null){
-      txt="Not found: ${this.ep.name}";
+  _buildRow(ModelCard card, int index, BuildContext context) {
+    var tt=Theme.of(context).textTheme;
+    var title=tt.title;
+    var body=tt.body1;
+
+
+    var primaryColor=Theme.of(context).primaryColor;
+
+    if (this.ep.typeOfListing == TypeOfListing.match) { //TypeOfListing.match
+      var f1 = card.get(this.ep.firstImage());
+      var s1 = (f1 != null ? f1 : ModelCard.getImgPlaceholder());
+
+      var f2 = card.get(this.ep.secondImage());
+      var s2 = (f2 != null ? f2 : ModelCard.getImgPlaceholder());
+
+      var txt1 = card.get(this.ep.firstName());
+      if (txt1 == null) {txt1 = "Not found: ${this.ep.firstName()}";}
+
+      var txt2 = card.get(this.ep.secondName());
+      if (txt2 == null) {txt2 = "Not found: ${this.ep.firstName()}";}
+
+      var team1=new Expanded(child:new Row(children: <Widget>[
+        Text(txt1, style: body),
+        Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child:
+          Image.network(s1, height: 30.0, width: 40.0, fit: BoxFit.cover)
+        )
+      ], mainAxisAlignment: MainAxisAlignment.spaceBetween,)) ;
+      var team2=new Expanded(child:new Row(children: <Widget>[
+        Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child:
+          Image.network(s2, height: 30.0, width: 40.0, fit: BoxFit.cover)
+        ),
+        Text(txt2, style: body)
+      ], mainAxisAlignment: MainAxisAlignment.spaceBetween,));
+
+      Widget sectionLabel;
+      if (this.ep.section!=null){
+        var newSection=card.get(this.ep.section);
+        var lastSection=index==0?null: epCards()[index-1].get(this.ep.section);
+
+        if (newSection!=lastSection){
+          sectionLabel=new Text(newSection, style:tt.caption, textAlign: TextAlign.start,);
+        }
+      }
+
+      var gd=GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: new Container(
+            child: Row(children: <Widget>[team1, SizedBox(width: 16.0, height: 60.0,), team2], mainAxisAlignment: MainAxisAlignment.spaceBetween,),
+          ), onTap: () {
+            print('tap');
+            _navigateDetailPage(card, context);
+          }
+      );
+
+      if (sectionLabel!=null){
+        return new Column(children: <Widget>[
+          new Container(height:32.0, child:sectionLabel, margin:EdgeInsets.only(top:20.0)),
+          gd
+        ], crossAxisAlignment: CrossAxisAlignment.start,);
+      } else {
+        return gd;
+      }
     }
+    else if (this.ep.typeOfListing == TypeOfListing.list) {
+      var txt = card.get(this.ep.firstName());
+      if (txt == null) {txt = "Not found: ${this.ep.firstName()}";}
 
-    return ListTile(
-      title: Text(txt, style: Theme.of(context).textTheme.title,),
-      trailing: Icon(
-        Icons.panorama_fish_eye,
-        color: Theme.of(context).primaryColor,
-      ),
-      onTap: () {
-//        Scaffold.of(context).showSnackBar(SnackBar(content:Text(card.name)));
-
-        _navigateDetailPage(card, context);
-      },
-    );
+      return ListTile(
+        title: Text(txt, style: title,),
+        trailing: Icon(Icons.panorama_fish_eye, color: primaryColor,),
+        onTap: () {_navigateDetailPage(card, context);},
+      );
+    }
   }
-  _buildSourceRow(ModelCard card, BuildContext context) {
-    var txt=card.get(this.ep.name);
+  _buildSourceRow(ModelCard card, int index, BuildContext context) {
+    var txt=card.get(this.ep.firstName());
     if (txt==null){
-      txt="Not found: ${this.ep.name}";
+      txt="Not found: ${this.ep.firstName()}";
     }
 
     JsonEncoder encoder = new JsonEncoder.withIndent('  ');
@@ -313,7 +372,7 @@ class _CardListingState extends State<CardListing> {
               childAspectRatio: 1.1,
               crossAxisCount: (orientation == Orientation.portrait ? 2 : 3),
               children: List.generate(_cards.length, (index) {
-                return _buildGridItem(_cards[index], context);
+                return _buildGridItem(_cards[index], index, context);
               })
           ),
           onNotification: (notification) {
@@ -325,15 +384,15 @@ class _CardListingState extends State<CardListing> {
         }
     );
   }
-  _buildGridItem(ModelCard card, BuildContext context) {
+  _buildGridItem(ModelCard card, int index, BuildContext context) {
     var fi=card.get(this.ep.firstImage());
-    var src=(fi!=null?fi:card.getImgPlaceholder());
+    var src=(fi!=null?fi:ModelCard.getImgPlaceholder());
 
     var textStyle=Theme.of(context).textTheme.body1.copyWith(color: Colors.white);
 
-    var txt=card.get(this.ep.name);
+    var txt=card.get(this.ep.firstName());
     if (txt==null){
-      txt="Not found: ${this.ep.name}";
+      txt="Not found: ${this.ep.firstName()}";
     }
 
     Widget domcard, domImg, domTxt;

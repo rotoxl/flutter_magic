@@ -29,8 +29,12 @@ class _DetailPageState extends State<DetailPage> {
   final POSTER_RATIO = 0.7;
   final POSTER_HEIGHT= 180.0;
 
+  final MARGIN_H=16.0;
+
   ThemeData theme;
   TextTheme textTheme;
+  TextStyle styleOverline, styleBody;
+
 
   _DetailPageState(this._card, this._cardToCompare);
 
@@ -41,20 +45,24 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     this.theme= Theme.of(context);
     this.textTheme= Theme.of(context).textTheme;
+    this.styleOverline=this.textTheme.button.copyWith(fontSize: 10.0);
+    this.styleBody=this.textTheme.body1;
 
     var ep=getEndPoint();
 
     appData.logEvent('detail_show', {'ep':ep.endpointTitle, 'typeOfDetail':ep.typeOfDetail.toString(), 'card':this._card.id, 'cardToCompare':this._cardToCompare!=null?this._cardToCompare.id:null} );
 
     List<Widget>allWidgets;
-    if (ep.typeOfDetail==TypeOfDetail.detailsPage){
+    if (ep.typeOfDetail==TypeOfDetail.details){
       allWidgets=detailPage();
 
     } else if (ep.typeOfDetail==TypeOfDetail.productCompare){
       allWidgets=comparePage();
 
-    } else if (ep.typeOfDetail==TypeOfDetail.heroPage){
+    } else if (ep.typeOfDetail==TypeOfDetail.hero){
       return heroPage();
+    } else if (ep.typeOfDetail==TypeOfDetail.match){
+      allWidgets=matchPage();
     }
 
     return Scaffold(
@@ -104,7 +112,7 @@ class _DetailPageState extends State<DetailPage> {
     var subheadStyle=Theme.of(context).textTheme.subhead.copyWith(color: Colors.white);
     var headStyle=Theme.of(context).textTheme.title.copyWith(color: Colors.white);
 
-    var name=_card.get(ep.name);
+    var name=_card.get(ep.firstName());
     var text=_card.get(ep.text);
 
     var ret=new Container(
@@ -115,10 +123,10 @@ class _DetailPageState extends State<DetailPage> {
         ),
         child: new Stack(children: <Widget>[
           new Positioned(
-            bottom: 40.0, left: 16.0, right: 16.0,
+            bottom: 40.0, left: MARGIN_H, right: MARGIN_H,
             child: Column(
               children: <Widget>[
-                name==null?Container(): new Text(_card.get(ep.name), style:headStyle, textAlign: TextAlign.center,),
+                name==null?Container(): new Text(_card.get(ep.firstName()), style:headStyle, textAlign: TextAlign.center,),
                 new Container(height: 10.0,),
                 text==null?Container(): new Text(text, style:subheadStyle, textAlign: TextAlign.center)
               ],),),
@@ -127,6 +135,258 @@ class _DetailPageState extends State<DetailPage> {
     );
 
     return new GestureDetector(child: ret, onTap: () => Navigator.pop(context, 'Nope!'),);
+  }
+  List<Widget> matchPage(){
+    var tt=Theme.of(context).textTheme;
+
+    EndPoint ep=this.getEndPoint();
+
+    List<Widget>allWidgets=new List<Widget>();
+    allWidgets.addAll([
+      new Container(height:22.0, child:new Text(_card.get(ep.section), style:tt.caption, textAlign: TextAlign.start), margin:EdgeInsets.only(top:20.0, left:MARGIN_H)),
+      new Container(color:this.theme.canvasColor, child:sidebyside(
+          teamPoster(_card.get(ep.firstName()), _card.get('{home_team/goals}'), _card.get(ep.firstImage()), true),
+          teamPoster(_card.get(ep.secondName()),_card.get('{away_team/goals}'), _card.get(ep.secondImage()), false),
+          bottom:130.0,
+        )
+      ),
+      separator(),
+    ]);
+
+    allWidgets.addAll([
+      sectionLabel('Officials'),
+      teamTags(),
+
+      separator(),
+      sectionLabel('Venue'),
+      //TODO hardcoded_value
+      textAndImage(_card.get('{venue}'), _card.get('{location}'), "https://img.fifa.com/image/upload/t_tc1/wulvncwmgnfeixxsp5gv.jpg"),
+
+      separator(),
+      sectionLabel('Events'),
+    ]);
+
+    //{home_team_events+away_team_events/sort:time}, hay que meter el campo origin:left/right para distinguirlas
+    //TODO hardcoded_fields
+    List<dynamic>data0=_card.get('home_team_events');
+    for (var i=0; i<data0.length; i++){
+      data0[i]['side']='left';
+    }
+    List<dynamic>data1=_card.get('away_team_events');
+    for (var i=0; i<data1.length; i++){
+      data1[i]['side']='right';
+    }
+
+    List<dynamic>timelinedata=data0;
+    timelinedata.addAll(data1);
+
+    timelinedata.sort((a,b){
+      var vala=a['time'].toString().split("'")[0];
+      var valb=b['time'].toString().split("'")[0];
+
+      var numa=int.parse(vala);
+      var numb=int.parse(valb);
+
+      return numa.compareTo(numb);
+    });
+
+    allWidgets.addAll(timeLine(timelinedata));
+
+    allWidgets.addAll([
+      separator(),
+      sectionLabel('Stats'),
+      teamFields(),
+    ]);
+
+    return allWidgets;
+  }
+
+  List<Widget> timeLine(data){
+    var rowHeight=60.0;
+    var screenWidth=MediaQuery.of(context).size.width;
+
+    var centerColWidth=40.0;
+    var colWidth=(screenWidth-centerColWidth)/2;
+
+    var l=<Widget>[];
+
+    for (var i=0;i<data.length; i++){
+      var fila=data[i];
+
+      Container leftCol=new Container(width:colWidth); Container rightCol=new Container(width:colWidth);
+      var centerCol; var colItems;
+
+      colItems=[
+        Text(fila['time'], style:textTheme.caption),
+        Text(fila['type_of_event'], style:textTheme.caption ),
+        Expanded(child:Text(fila['player'], style:textTheme.subhead, overflow: TextOverflow.fade, maxLines: 1, softWrap: false,)),
+      ];
+
+      if (fila['side']=='left') {//isIzq
+        leftCol=new Container(width:colWidth, child:new Column(children: colItems, crossAxisAlignment: CrossAxisAlignment.end),);
+      } else {
+        rightCol=new Container(width:colWidth, child:new Column(children: colItems, crossAxisAlignment: CrossAxisAlignment.start));
+      }
+
+      double bulletTop=rowHeight/4;
+      double lineStart=0.0, lineEnd=rowHeight;
+      if (i==0){
+        lineStart=bulletTop;
+        lineEnd=rowHeight-lineStart;
+      }
+      else if (i==data.length-1){
+        lineStart=0.0;
+        lineEnd=bulletTop;
+      }
+
+      centerCol=new Container(height: rowHeight, width:centerColWidth, child: new Stack(children: <Widget>[
+            new Positioned(
+              top: lineStart, height: lineEnd, left: 25.0,
+              child: new Container(height: 20.0, width: 1.0, color: Colors.grey),
+            ),
+            new Positioned(
+              top: bulletTop-8.0, left: 16.0,
+              child: new Container(
+                margin: new EdgeInsets.all(5.0),
+                height: 10.0, width: 10.0,
+                decoration: new BoxDecoration(shape: BoxShape.circle,color: theme.accentColor),
+                ),
+              )
+          ])
+        );
+
+      l.add(new Container(height:rowHeight, width:screenWidth, child:new Row(children: <Widget>[leftCol, centerCol, rightCol] )));
+
+    }
+  return l;
+  }
+
+  Widget sectionLabel(String label){
+    return new Container(margin:EdgeInsets.only(left:MARGIN_H, bottom:8.0, top:8.0, ), child: Text(label, style: textTheme.subhead));
+  }
+  Widget textAndImage(String title, String subtitle, String url){
+    var POSTER_WIDTH =100.0;
+    var height = POSTER_RATIO * POSTER_WIDTH;
+
+    var domImage=new Image.network(url, fit: BoxFit.fitHeight, width: POSTER_WIDTH, height: height,);
+    var boxedImage=Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: domImage);
+
+    var gd=GestureDetector(
+      child:boxedImage,
+      onTap: () {
+        navigateImagePage(url, context);
+      },
+    );
+
+    return new Container(margin:EdgeInsets.only(left:MARGIN_H, right:MARGIN_H, bottom:8.0, top:2.0), child: Row(children: <Widget>[
+      new Expanded(flex:2, child:Column(children: <Widget>[
+          Text(title, style:styleBody, ),
+          Text(subtitle, style:textTheme.body2.copyWith(color: Colors.grey), ),
+          ], crossAxisAlignment: CrossAxisAlignment.start,)
+      ),
+      new Expanded(flex:1, child:gd),
+      ])
+    );
+  }
+  Widget teamFields(){
+    //TODO hardcoded_fields
+    var lista=[
+//      {"left":"{home_team/goals}", "right":"{away_team/goals}", "label":"Goals"},
+      {"left":"{home_team_statistics/red_cards}", "right":"{away_team_statistics/red_cards}", "label":"Red cards"},
+      {"left":"{home_team_statistics/yellow_cards}", "right":"{away_team_statistics/yellow_cards}", "label":"Yellow cards"},
+
+      {"label":"separator"},
+      {"left":"{home_team/penalties}", "right":"{away_team/penalties}", "label":"Penalties"},
+      {"left":"{home_team_statistics/ball_possession}", "right":"{away_team_statistics/ball_possession}", "label":"Ball possession"},
+      {"left":"{home_team_statistics/tactics}", "right":"{away_team_statistics/tactics}", "label":"Tactics"},
+      {"left":"{home_team_statistics/num_passes}", "right":"{away_team_statistics/num_passes}", "label":"Passes"},
+      {"left":"{home_team_statistics/fouls_committed}", "right":"{away_team_statistics/fouls_committed}", "label":"Fouls"},
+    ];
+    List<Widget>sec = new List<Widget>();
+
+    for (int i = 0; i <lista.length; i++) {
+      var fila=lista[i];
+
+      var attText = fila["label"];
+      if (attText=='separator'){
+        sec.add(SizedBox(height:18.0));
+        continue;
+      }
+      var attrLeft = fila["left"];
+      var attrRight = fila["right"];
+
+      var value1 = beautifulNumber( valueForField(_card.get(attrLeft)).toString() );
+      var value2 = beautifulNumber( valueForField(_card.get(attrRight)).toString() );
+
+      sec.add( _valueLabelValue(value1, attText, value2));
+    }
+    return new Container(child: Column(children: sec,),);
+  }
+
+  Widget teamTags(){
+    var ret=<String>[];
+
+    if (getEndPoint().tags==null)
+      return Container();
+
+    var chipsAttr=["officials"]; //getEndPoint().tags;
+
+    for (var i=0; i<chipsAttr.length; i++){
+      var fieldName=chipsAttr[i];
+      print (fieldName);
+      var values=_card.get(fieldName);
+
+      if (values==null || values==''){
+        //pass
+      }
+      else if (values.runtimeType.toString()=='String'){
+        if (values.indexOf(',')>-1){
+          var temp=values.split(',');
+          for (var j=0; j<temp.length; j++){
+            ret.add( temp[j].toString().trim() );
+          }
+        }
+        else
+          ret.add(values);
+      }
+      else {
+        for (var j=0; j<values.length; j++) {
+          var value=values[j];
+          ret.add(value);
+        }
+      }
+    }
+
+    return SizedBox.fromSize(
+        size: const Size.fromHeight(40.0),
+        child: ListView.builder(
+          itemCount: ret.length,
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.only(top: 0.0, left: MARGIN_H),
+          itemBuilder: (BuildContext, index) => _buildChip(ret[index]),
+        )
+    );
+  }
+  double getHeightForImage(double width){
+    return width*POSTER_RATIO;
+  }
+  Widget teamPoster(String name, String result, String url, isLeft){
+    var POSTER_WIDTH =100.0;
+
+    if (url==null || url=='') url=ModelCard.getImgPlaceholder();
+
+    var domImage=new Image.network(url, fit: BoxFit.fill, width: POSTER_WIDTH, height: getHeightForImage(POSTER_WIDTH),);
+
+    return new Column(
+        crossAxisAlignment: isLeft?CrossAxisAlignment.start:CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: domImage),
+          SizedBox(height: 8.0),
+          Text(name, style: styleBody),
+          Text(result, style: textTheme.title),
+        ]
+    );
   }
 
   valueForField(value) {
@@ -141,10 +401,12 @@ class _DetailPageState extends State<DetailPage> {
     var ep=getEndPoint();
 
     var src=_card.get(ep.secondImage() );
-    if (src==null || src=='') src=_card.getImgPlaceholder();
+    if (src==null || src=='') src=ModelCard.getImgPlaceholder();
 
     var height=appBarHeight;
-    if (ep.typeOfDetail==TypeOfDetail.heroPage || ep.typeOfDetail==TypeOfDetail.productCompare){
+    if (ep.typeOfDetail==TypeOfDetail.hero ||
+        ep.typeOfDetail==TypeOfDetail.productCompare ||
+        ep.typeOfDetail==TypeOfDetail.match){
       src='';
       height=16.0;
     }
@@ -177,11 +439,6 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget compareFields() {
-    final ThemeData themeData = Theme.of(context);
-
-    var subheadStyle=Theme.of(context).textTheme.subhead;
-    var caption=themeData.textTheme.caption;
-
     List<Widget>sec = new List<Widget>();
 
     for (int i = 0; i < getEndPoint().fields.length; i++) {
@@ -192,38 +449,25 @@ class _DetailPageState extends State<DetailPage> {
       var value2 = beautifulNumber( valueForField(_cardToCompare.get(attr)).toString() );
 
       sec.add(
-        new Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child:new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    new Text(value1,   textAlign: TextAlign.left, style: subheadStyle),
-                  ]
-                ),
-              ),
-              new Expanded(child:new Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    new Text(att_text, textAlign: TextAlign.left, style: caption,),
-                  ],
-                ),
-              ),
-              new Expanded(child:new Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    new Text(value2),
-                    new Text(' ', style: themeData.textTheme.caption,),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        )
+        _valueLabelValue(value1, att_text, value2)
       );
     }
     return new Container(child: Column(children: sec,),);
+  }
+  Widget _valueLabelValue(value1, att_text, value2){
+    return new Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(child: new Text(value1,   textAlign: TextAlign.left, style: textTheme.subhead),
+          ),
+          new Expanded(child: new Text(att_text, textAlign: TextAlign.center, style: textTheme.caption,),
+          ),
+          new Expanded(child: new Text(value2, textAlign: TextAlign.right, style: textTheme.subhead),
+          ),
+        ],
+      ),
+    );
   }
 
   EndPoint getEndPoint(){
@@ -239,21 +483,21 @@ class _DetailPageState extends State<DetailPage> {
     var ep=getEndPoint();
 
     var src=_card.get(ep.firstImage());
-    var name = _card.get(ep.name);
+    var name = _card.get(ep.firstName());
 
     return Stack(children: [
       Padding(padding: const EdgeInsets.only(bottom: 200.0)),
 
       Positioned(
         bottom: 0.0,
-        left: 16.0,
-        right: 16.0,
+        left: MARGIN_H,
+        right: MARGIN_H,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _titleLeftBlock(src, altImage:_card.getImgPlaceholder()),
-            SizedBox(width: 16.0),
+            _titleLeftBlock(src, altImage:ModelCard.getImgPlaceholder()),
+            SizedBox(width: MARGIN_H),
             _titleRightBlock(name),
           ],
         ),
@@ -296,11 +540,11 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
-  Widget sidebyside(Widget left, Widget right){
+  Widget sidebyside(Widget left, Widget right, {double bottom=220.0}){
     return Stack(children: [
-      Padding(padding: const EdgeInsets.only(bottom: 220.0)),
+      Padding(padding: EdgeInsets.only(bottom: bottom)),
       Positioned(
-        bottom: 0.0, left: 16.0, right: 16.0,
+        bottom: 0.0, left: MARGIN_H, right: MARGIN_H,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.end,
@@ -317,13 +561,13 @@ class _DetailPageState extends State<DetailPage> {
     var ep=getEndPoint();
 
     var url=newcard.get(ep.firstImage());
-    var name = newcard.get(ep.name);
+    var name = newcard.get(ep.firstName());
 
     var themeSoft = textTheme.headline;
 
     var width = POSTER_RATIO * POSTER_HEIGHT;
 
-    if (url==null || url=='') url=_card.getImgPlaceholder();
+    if (url==null || url=='') url=ModelCard.getImgPlaceholder();
 
     var doesNotWantsBox=(url.endsWith('.png'));//assume it's transparent --> no border
     var domImage=new Image.network(url, fit: doesNotWantsBox?BoxFit.scaleDown: BoxFit.cover, width: width, height: POSTER_HEIGHT,);
@@ -344,11 +588,11 @@ class _DetailPageState extends State<DetailPage> {
 
     var listaAtr=getEndPoint().stats;
 
-    var themeBold=textTheme.headline.copyWith(fontWeight: FontWeight.w400, color: theme.textTheme.caption.decorationColor,);
+    var themeBold=textTheme.headline.copyWith(fontWeight: FontWeight.w400, color: theme.primaryColor,);
     var themeSoft = textTheme.caption.copyWith(color: theme.textTheme.caption.decorationColor);
 
     for (var i=0; i<listaAtr.length; i++){
-      if (i>0) ret.add( SizedBox(width: 16.0) );
+      if (i>0) ret.add( SizedBox(width: MARGIN_H) );
 
       var att=listaAtr[i];
       var att_text=beautifulAttr(att);
@@ -356,7 +600,7 @@ class _DetailPageState extends State<DetailPage> {
       var value=beautifulNumber( _card.get(att) );
 
       var numericRating = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(value, style: themeBold, textAlign: TextAlign.center,),
@@ -493,7 +737,7 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget separator() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: new BoxDecoration(
           border: new Border(bottom: new BorderSide(color: theme.dividerColor))
       ),
@@ -506,24 +750,23 @@ class _DetailPageState extends State<DetailPage> {
     if (value==null)
       return null;
 
-    var valueStyle=textTheme.body1.copyWith(color: Colors.black45, fontSize: 16.0, );
-    var moreStyle= textTheme.body1.copyWith(fontSize: 16.0, color: theme.accentColor);
+    var body2Accent=this.textTheme.body2.copyWith(color: theme.primaryColor);
 
     return Padding(
-        padding: EdgeInsets.only(top:16.0, left: 16.0, right:16.0),
+        padding: EdgeInsets.only(top:16.0, left: MARGIN_H, right:MARGIN_H),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Desc', style: textTheme.subhead.copyWith(fontSize: 18.0),),
+            Text('Desc', style: styleOverline),
             SizedBox(height: 8.0),
-            Text(value, style:valueStyle,),
+            Text(value, style:styleBody,),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('more', style: moreStyle),
-                Icon(Icons.keyboard_arrow_down, size: 18.0, color: theme.accentColor,),
+                Text('more', style: body2Accent),
+                Icon(Icons.keyboard_arrow_down, size: 18.0, color: theme.primaryColor,),
               ],
             ),
           ],
@@ -607,7 +850,7 @@ class _DetailPageState extends State<DetailPage> {
     if (url=='') return null;
 
     var el=Padding(
-      padding: const EdgeInsets.only(right: 16.0),
+      padding: new EdgeInsets.only(right: MARGIN_H),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(4.0),
         child: Image.network(url, width: 160.0, height: 120.0, fit: BoxFit.cover,),

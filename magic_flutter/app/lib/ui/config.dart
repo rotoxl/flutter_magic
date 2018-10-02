@@ -33,6 +33,7 @@ class _ConfigPageState extends State<ConfigPage> {
   //        IconButton(icon: const Icon(Icons.save),onPressed: () {appData.save();},),
   //        IconButton(icon: const Icon(Icons.folder_open),onPressed: () {print(appData.loadEndPoints());},),
             IconButton(icon: const Icon(Icons.add), onPressed: () {this.endPointAdd();},),
+            IconButton(icon: const Icon(Icons.cloud_download), onPressed: () {this.endPointsRefresh();},),
           ]
       );
   }
@@ -85,5 +86,9 @@ class _ConfigPageState extends State<ConfigPage> {
   void _showSnackbar(String text){
     final snackBar = SnackBar(content: Text(text), duration: Duration(seconds: 3));
     this._scaffoldKey.currentState.showSnackBar(snackBar);
+  }
+
+  void endPointsRefresh() async{
+    appData.loadEndPoints(); //this only makes sense while debuggin' remoteConfig
   }
 }

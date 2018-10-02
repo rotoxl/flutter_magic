@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 
 import 'package:app/models/model_card.dart';
 
-enum TypeOfListing{list, gridWithoutName, gridWithName}
+enum TypeOfListing{list, gridWithoutName, gridWithName, match}
 enum TypeOfDetail{
-  detailsPage,
+  details,
   match,
   productCompare,
-  heroPage //https://www.uplabs.com/posts/lonely-planet-hp-destination-selector
+  hero //https://www.uplabs.com/posts/lonely-planet-hp-destination-selector
 }
 
 class EndPoint{
   TypeOfListing typeOfListing=TypeOfListing.gridWithName;
-  TypeOfDetail typeOfDetail=TypeOfDetail.detailsPage;
+  TypeOfDetail typeOfDetail=TypeOfDetail.details;
 
   String endpointTitle, endpointUrl;
 
@@ -33,6 +33,11 @@ class EndPoint{
   String aboutDoc, aboutWeb, aboutInfo, aboutLogo;
 
   Color color; ThemeData theme;
+
+  String section; //group items
+
+  //detailType=match
+  var names=List<String>();
 
   EndPoint({this.endpointTitle, this.endpointUrl, this.color, this.theme});
 
@@ -61,6 +66,19 @@ class EndPoint{
       return this.images[1];
   }
 
+  firstName(){
+    if (names.length==0)
+      return name;
+    else
+      return names[0];
+  }
+  secondName(){
+    if (names.length==0)
+      return null;
+    else
+      return names[1];
+  }
+
   List<ModelCard> _cards=new List<ModelCard>();
   List<ModelCard> get cards{
     return _cards;
@@ -78,27 +96,33 @@ class EndPoint{
     c.endpointTitle=json['endpointTitle'];
     c.endpointUrl=json['endpointUrl'];
 
-    //TODO parse color
-    //ep.color=colorList[i];
-    var newcolor=json['color'];
-    if (newcolor==null){
-
-    } else if (newcolor=='red'){
-      c.color=Colors.red;
-    } else if (newcolor=='green'){
-      c.color=Colors.green;
-    }else if (newcolor=='orange'){
-      c.color=Colors.orange;
-    }else if (newcolor=='grey'){
-      c.color=Colors.grey;
-    }else if (newcolor=='yellow'){
-      c.color=Colors.yellow;
-    }else if (newcolor=='indigo'){
-      c.color=Colors.indigo;
-    }else if (newcolor=='pink'){
-      c.color=Colors.pink;
+    if (json['theme']=='dark'){
+      c.theme=ThemeData.dark().copyWith(accentColor: Colors.grey[800], buttonColor: Colors.grey[800]);
     } else {
-      c.color=Colors.deepPurple;
+      var newcolor=json['color'];
+      Color finalcolor;
+      if (newcolor==null){
+
+      } else if (newcolor=='red'){
+        finalcolor=Colors.red;
+      } else if (newcolor=='green'){
+        finalcolor=Colors.green;
+      }else if (newcolor=='orange'){
+        finalcolor=Colors.orange;
+      }else if (newcolor=='grey'){
+        finalcolor=Colors.grey;
+      }else if (newcolor=='yellow'){
+        finalcolor=Colors.yellow;
+      }else if (newcolor=='indigo'){
+        finalcolor=Colors.indigo;
+      }else if (newcolor=='pink'){
+        finalcolor=Colors.pink;
+      } else if (newcolor=='brown'){
+        finalcolor=Colors.brown;
+      } else {
+        finalcolor=Colors.deepPurple;
+      }
+      c.color=finalcolor;
     }
 
     c.id=json['id'];
@@ -109,7 +133,10 @@ class EndPoint{
 
     c.fields=List<String>.from(json['fields']);
     c.stats=List<String>.from(json['stats']);
-    c.tags=List<String>.from(json['tags']);
+
+    if (json['tags']!=null)
+      c.tags=List<String>.from(json['tags']);
+
     c.related=json['related'];
 
     if (json['headers']!=null)
@@ -130,11 +157,11 @@ class EndPoint{
 
     var td=json['typeOfDetail'];
     if (td=='gridWithName')
-      c.typeOfDetail=TypeOfDetail.detailsPage;
+      c.typeOfDetail=TypeOfDetail.details;
     else if (td=='productCompare')
       c.typeOfDetail=TypeOfDetail.productCompare;
     else if (td=='heroPage')
-      c.typeOfDetail=TypeOfDetail.heroPage;
+      c.typeOfDetail=TypeOfDetail.hero;
     else if (td=='match')
       c.typeOfDetail=TypeOfDetail.match;
 

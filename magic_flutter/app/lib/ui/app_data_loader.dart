@@ -9,10 +9,10 @@ import 'package:app/models/end_point.dart';
 import 'package:app/app_data.dart';
 
 class AppDataXLoader extends StatelessWidget{
-  bool loaded=false;
-  void Function(AppData p) _themeUpdater;
+  bool _loaded=false;
+  final void Function(AppData p) _themeUpdater;
 
-  FirebaseAnalytics analytics;
+  final FirebaseAnalytics analytics;
 
   AppDataXLoader(void Function(AppData p) this._themeUpdater, FirebaseAnalytics this.analytics);
 
@@ -55,8 +55,8 @@ class AppDataXLoader extends StatelessWidget{
         builder: (context, snapshot) {
           print ('snapshot, one more time');
 
-          if (snapshot.hasData && this.loaded==false) {
-            this.loaded=true;
+          if (snapshot.hasData && this._loaded==false) {
+            this._loaded=true;
             print('loaded!');
 
             new Future.delayed(const Duration(milliseconds: 10), ()=>_navigateNext(context, snapshot));

@@ -27,7 +27,7 @@ class EditDetailsPageState extends State<EditDetailsPage> {
 
   @override
   void initState() {
-    _fieldName = this.endPoint.name;
+    _fieldName = this.endPoint.firstName();
 
     _fieldID = this.endPoint.id;
     _fieldImage = this.endPoint.firstImage();

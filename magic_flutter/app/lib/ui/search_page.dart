@@ -80,7 +80,7 @@ class _SearchPageState extends State<SearchPage> {
       ret.add(
           new MaterialSearchResult<String>(
             value: card.get(ep.id), //The value must be of type <String>
-            text: card.get(ep.name), //String that will be show in the list
+            text: card.get(ep.firstName()), //String that will be show in the list
             icon: Icons.panorama_fish_eye,
           )
       );

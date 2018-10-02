@@ -105,7 +105,7 @@ class ModelCard{
     return c;
   }
 
-  getImgPlaceholder() {
+  static getImgPlaceholder() {
     return 'https://imgplaceholder.com/420x320/cccccc/757575/glyphicon-picture';
   }
 }
