@@ -1,0 +1,211 @@
+{
+"version_code":"201810022251", 
+"default_endpoints":[
+{
+    "endpointTitle":"Magic: The Gathering",
+    "endpointUrl":"https://api.magicthegathering.io/v1/cards", 
+    "color":"orange",
+    "categories":["Games", "Entertainment"],
+
+    "id":"id",
+    "name":"name",
+    "text":"text",
+    "stats":["toughness", "power", "cmc"],
+    "tags":["types", "subtypes"],
+    "fields":["artist", "setName", "watermark"],
+    "__related":null, 
+    "images":["imageUrl"],
+    "type":"Bundled",
+
+    "aboutWeb":"https://magicthegathering.io/",
+    "aboutDoc":"https://docs.magicthegathering.io/",
+    "aboutInfo":"Join the Community of Developers building with the MTG API",
+    "aboutLogo":"https://magicthegathering.io/images/bg.jpg",
+},{
+    "endpointTitle":"World Countries",
+    "endpointUrl":"https://restcountries.eu/rest/v2/all", 
+    "color":"indigo",
+    "categories":["Education", "Reference"],
+
+    "id":"alpha3Code",
+    "name":"name",
+    "__text":"text",
+    "stats":["population", "area"],
+    "tags":["region", "subregion"],
+    "fields":["capital", "currencies", "topLevelDomain"],
+    "related":"borders",
+    "images":["https://api.backendless.com/2F26DFBF-433C-51CC-FF56-830CEA93BF00/473FB5A9-D20E-8D3E-FF01-E93D9D780A00/files/CountryFlagsPng/{alpha3Code|lower}.png"],
+    "type":"Bundled",
+
+    "aboutWeb":"https://restcountries.eu/",
+    "aboutDoc":"https://github.com/apilayer/restcountries/",
+    "aboutInfo":"Get information about countries via a RESTful API",
+},{
+    "endpointTitle":"Trending movies (TheMovieDB)",
+    "endpointUrl":"https://api.themoviedb.org/3/trending/all/day?api_key=a2f45e3ad3af96b2ec9d0542adbfd1da&region=ES", 
+    "color":"red",
+    "categories":["Entertainment"],
+
+    "id":"id",
+    "name":"{original_title||original_name}",
+    "text":"text",
+    "stats":["vote_average", "vote_count", "popularity"],
+    "__tags":[],
+    "fields":["release_date"],
+    "__related":null, 
+    "images":[  "https://image.tmdb.org/t/p/w500/{poster_path}",
+                "https://image.tmdb.org/t/p/w500/{backdrop_path}"],
+    "type":"Bundled",
+
+    "aboutWeb":"https://www.themoviedb.org",
+    "aboutDoc":"https://www.themoviedb.org/documentation/api",
+    "aboutInfo":"The Movie Database (TMDb) is a popular, user editable database for movies and TV shows.",
+    "aboutLogo":"https://www.themoviedb.org/assets/1/v4/logos/312x276-primary-green-74212f6247252a023be0f02a5a45794925c3689117da9d20ffe47742a665c518.png",
+
+    "typeOfListing":"gridWithoutName"
+},{
+    "endpointTitle":"NY Restaurants (Zomato)",
+    "endpointUrl":"https://developers.zomato.com/api/v2.1/search?entity_id=280&entity_type=city", 
+    "color":"green",
+    "headers":{"user-key": "ab6e490707b8f2f51c864618f1ad90f4"},
+    "categories":["Food & drink", "Lifestyle"],
+
+    "id":"{restaurant/id}",
+    "name":"{restaurant/name}",
+    "text":"{restaurant/location/address}\n{restaurant/location/locality}\n{restaurant/location/city}",
+    "stats":["{restaurant/user_rating/aggregate_rating}", "{restaurant/user_rating/votes}"],
+    "tags":["{restaurant/cuisines}"],
+    "fields":["release_date"],
+    "__related":null, 
+    "images":[  "{restaurant/featured_image}"],
+    "type":"Bundled",
+
+    "aboutWeb":"https://www.zomato.com",
+    "aboutDoc":"https://developers.zomato.com/documentation",
+    "aboutInfo":"Find the best restaurants, cafés, and bars",
+    "aboutLogo":"https://upload.wikimedia.org/wikipedia/en/thumb/0/09/Zomato_company_logo.png/240px-Zomato_company_logo.png",
+
+    "typeOfListing":"gridWithName"
+},{
+    "endpointTitle":"Places",
+    "endpointUrl":"https://s3-eu-west-1.amazonaws.com/api-explorer-app/places/placesAPI.json", 
+    "color":"green",
+    "__headers":null,
+    "categories":["Photo & video", "Travel"],
+
+    "id":"src",
+    "name":"author",
+    "text":"place",
+    "__stats":["{restaurant/user_rating/aggregate_rating}", "{restaurant/user_rating/votes}"],
+    "__tags":null,
+    "__fields":null,
+    "__related":null, 
+    "images":["src"],
+
+    "aboutWeb":"https://unsplash.com",
+    "aboutDoc":"https://unsplash.com/developers",
+    "aboutInfo":"Download free (do whatever you want) high-resolution photos",
+    "__aboutLogo":null,
+
+    "typeOfListing":"gridWithoutName"
+},{
+    "endpointTitle":"UFC Fighters",
+    "endpointUrl":"http://ufc-data-api.ufc.com/api/v3/iphone/fighters", 
+    "color":"grey",
+    "__headers":null,
+    "categories":["Sports"],
+
+    "id":"id",
+    "name":"{nickname} {first_name} {last_name}",
+    "__text":null,
+    "stats":["wins", "draws", "losses"],
+    "tags":["fighter_status", "rank"],
+    "fields":["link"],
+    "__related":null, 
+    "images":["profile_image", "thumbnail", "belt_thumbnail", "left_full_body_image", "right_full_body_image"],
+
+    "aboutWeb":"http://ufc-data-api.ufc.com",
+    "aboutDoc":"http://ufc-data-api.ufc.com/api/v1/us",
+    "aboutInfo":"Adept's sports focused fan engagement platform is used by some of the most recognized sports brands in the world. Ask what it can do for you.",
+    "__aboutLogo":null,
+
+    "typeOfListing":"gridWithName"
+}, {
+    "endpointTitle":"Google Books",
+    "endpointUrl":"https://www.googleapis.com/books/v1/volumes?q=rock%20school%20drums", 
+    "color":"brown",
+    "__headers":null,
+    "categories":["Entertainment"],
+
+    "id":"id",
+    "name":"{volumeInfo/title}",
+    "text":"{searchInfo/textSnippet}",
+    "__stats":["wins", "draws", "losses"],
+    "tags":["{volumeInfo/maturityRating}", "{volumeInfo/printType}", "{volumeInfo/categories/0}"],
+    "fields":["{volumeInfo/infoLink}"],
+    "__related":null, 
+    "images":["{volumeInfo/imageLinks/thumbnail}"],
+
+    "aboutWeb":"https://books.google.es",
+    "aboutDoc":"https://developers.google.com/books/docs/v1/reference/",
+    "aboutInfo":"Google Books is our effort to make book content more discoverable on the Web.",
+    "aboutLogo":"http://kinlane-productions.s3.amazonaws.com/api-evangelist-site/company/logos/Screen%20Shot%202017-03-16%20at%204.28.26%20PM.png",
+
+    "typeOfListing":"gridWithoutName"
+}, {
+    "endpointTitle":"2018 Fifa WorldCup Russia",
+    "endpointUrl":"http://worldcup.sfg.io/matches", 
+    "theme":"dark",
+    "categories":["Sports"],
+    "type":"Bundled",
+    "id":"fifa_id",
+
+    "section":"stage_name",
+    "names":[
+        "{home_team/country}", 
+        "{away_team/country}"
+    ],
+    "scores":[
+        "{home_team/goals}",
+        "{away_team/goals}"
+    ],
+    "images":[
+        "https://raw.githubusercontent.com/rotoxl/country-flags/master/png100px_by_cioc/{home_team/code}.png",
+        "https://raw.githubusercontent.com/rotoxl/country-flags/master/png100px_by_cioc/{away_team/code}.png"
+    ],
+    "__faltaOfficials":"",
+
+    "venue":{
+        "title":"{venue}",
+        "subtitle":"{location}",
+        "img":"https://img.fifa.com/image/upload/t_tc1/wulvncwmgnfeixxsp5gv.jpg"
+    },
+
+    "fields":[
+        {"left":"{home_team_statistics/red_cards}", "right":"{away_team_statistics/red_cards}", "label":"Red cards"},
+        {"left":"{home_team_statistics/yellow_cards}", "right":"{away_team_statistics/yellow_cards}", "label":"Yellow cards"},
+        {"label":"separator"},
+        {"left":"{home_team/penalties}", "right":"{away_team/penalties}", "label":"Penalties"},
+        {"left":"{home_team_statistics/ball_possession}", "right":"{away_team_statistics/ball_possession}", "label":"Ball possession"},
+        {"left":"{home_team_statistics/tactics}", "right":"{away_team_statistics/tactics}", "label":"Tactics"},
+        {"left":"{home_team_statistics/num_passes}", "right":"{away_team_statistics/num_passes}", "label":"Passes"},
+        {"left":"{home_team_statistics/fouls_committed}", "right":"{away_team_statistics/fouls_committed}", "label":"Fouls"}
+    ],
+    "events":{
+        "list":["home_team_events", "away_team_events"],
+        "sort":"time",
+        "sort_strip":["'"],
+        "kind":"home/away"
+    },
+    
+    
+
+    "aboutWeb":"https://worldcup.sfg.io",
+    "aboutDoc":"https://github.com/estiens/world_cup_json",
+    "aboutInfo":"World cup 2018... in JSON",
+    
+    "typeOfListing":"match",
+    "typeOfDetail":"match"
+}
+
+]}

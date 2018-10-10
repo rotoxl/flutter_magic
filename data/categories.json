@@ -1,0 +1,36 @@
+https://developer.apple.com/app-store/categories/
+
+{
+    "version_code":"201810022251",
+    "tags":[
+        {"name":"Art"},
+        {"name":"Science"},
+        {"name":"Local"},
+
+        {"name":"Technology"},
+
+        {"name":"Games"},
+        {"name":"Business"},
+        {"name":"Education"},
+        {"name":"Lifestyle"},
+        {"name":"Entertainment", "eg":"books, music, movies, tv series"},
+        {"name":"Utilities"},
+        {"name":"Travel"},
+        {"name":"Health"},
+
+        {"name":"Food & drink"},
+        {"name":"Productivity"},
+
+        {"name":"Finance"},
+        {"name":"Photo & video"},
+        {"name":"Reference"},
+        {"name":"Sports"},
+        {"name":"Social"},
+        {"name":"News"},
+        {"name":"Medical"},
+        {"name":"Shopping"},
+
+        {"name":"Kids", "eg":"content suitable for children aged under 11"}
+    ]
+}
+
