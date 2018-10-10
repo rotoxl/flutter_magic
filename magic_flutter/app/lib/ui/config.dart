@@ -42,7 +42,7 @@ class _ConfigPageState extends State<ConfigPage> {
     _endpoints.sort((EndPoint a, EndPoint b) => a.endpointUrl.compareTo(b.endpointUrl) );
 
     return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
+//        padding: const EdgeInsets.all(16.0),
         itemCount:(_endpoints.length*2)-1,
         itemBuilder: (context, index) {
           if (index.isOdd)
@@ -51,10 +51,29 @@ class _ConfigPageState extends State<ConfigPage> {
             return _buildRow(_endpoints[index ~/ 2], context);
         });
   }
+  Widget _buildChip(String value) {
+    return Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: Chip(
+          label: Text(value),
+//          labelStyle: them.caption,
+          backgroundColor: Colors.black12,
+        ),
+      );
+  }
   _buildRow(EndPoint ep, BuildContext context){
+//    var l=<Widget>[];
+//    for (var i=0; i<ep.categories.length; i++){
+//      l.add(_buildChip( ep.categories[i] ));
+//    }
+//
+//    var c=Container(child:Row(children:l));
+
     var row=ListTile(
-      title: Text(ep.endpointTitle, style: Theme.of(context).textTheme.body1,),
-      trailing: Icon(Icons.brightness_1, color: ep.color,),
+      contentPadding: EdgeInsets.symmetric(horizontal:16.0,),
+      title: Text(ep.endpointTitle, ),
+//      subtitle: c,
+      trailing: Icon(Icons.brightness_1, color: ep.epTheme.color,),
     );
 
     return new GestureDetector(

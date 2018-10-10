@@ -9,12 +9,12 @@ import 'package:url_launcher/url_launcher.dart';
 enum Type{sep, link, endPoint}
 
 class AboutAPIPage {
-  EndPoint ep;
+  EPAbout about;
 
   TextTheme textTheme;
   TextStyle linkStyle, aboutStyle;
 
-  AboutAPIPage(this.ep);
+  AboutAPIPage(this.about);
 
   Future<Null> _openURL(String url) async {
     if (await canLaunch(url)) {
@@ -38,11 +38,11 @@ class AboutAPIPage {
   Widget _getDom(BuildContext context){
 //    final ThemeData theme = Theme.of(context);
 
-    var txt=Text(this.ep.aboutInfo, softWrap:true, style:this.aboutStyle, overflow: TextOverflow.ellipsis, maxLines: 3,);
+    var txt=Text(this.about.info, softWrap:true, style:this.aboutStyle, overflow: TextOverflow.ellipsis, maxLines: 3,);
 
     var col1;
-    if (this.ep.aboutLogo!=null){
-      col1=Image.network(this.ep.aboutLogo, fit: BoxFit.cover, width: 100.0, height: 100.0);
+    if (this.about.logo!=null){
+      col1=Image.network(this.about.logo, fit: BoxFit.cover, width: 100.0, height: 100.0);
     }
     else{
       col1=Container(constraints: BoxConstraints(minWidth:100.0, minHeight: 100.0),
@@ -87,8 +87,8 @@ class AboutAPIPage {
 //              color:Colors.red,
               child:Column(
                 children: <Widget>[
-                  _link(this.ep.aboutWeb, this.ep.aboutWeb),
-                  _link(this.ep.aboutDoc, 'Visit docs')
+                  _link(this.about.web, this.about.web),
+                  _link(this.about.doc, 'Visit docs')
                 ],
               )
           ),

@@ -38,14 +38,14 @@ class _MyAppState extends State<MyApp>{
     };
 
     return new MaterialApp(
-      debugShowCheckedModeBanner:false,
-      title: 'API Explorer',
-      theme: theme,
-      navigatorObservers: [
-        new FirebaseAnalyticsObserver(analytics: analytics),
-      ],
-      routes: routes,
-      onGenerateRoute: _getRoute,
+        debugShowCheckedModeBanner:false,
+        title: 'API Explorer',
+        theme: theme,
+        navigatorObservers: [
+          new FirebaseAnalyticsObserver(analytics: analytics),
+        ],
+        routes: routes,
+        onGenerateRoute: _getRoute,
     );
   }
 
@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp>{
 
       var ep=this.appData!=null?this.appData.getCurrEndPoint():null;
       if (ep!=null)
-        appData.themeApplied=ep.theme!=null? ep.theme: ep.color;
+        appData.themeApplied=ep.epTheme;
     });
   }
   ThemeData get theme{
@@ -68,15 +68,16 @@ class _MyAppState extends State<MyApp>{
     if (this.appData!=null && this.appData.getCurrEndPoint()!=null)
       ep=this.appData.getCurrEndPoint();
 
-    if (ep!=null && ep.theme!=null){
-      return ep.theme;
+    if (ep!=null && ep.epTheme!=null){
+      return ep.epTheme.theme;
     }
     else {
-      return new ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: ep==null?Colors.indigo: ep.color,
-        platform: Theme.of(context).platform,
-      );
+      return
+        new ThemeData(
+          brightness: Brightness.light,
+          primarySwatch: ep==null?Colors.indigo: ep.epTheme.color,
+          platform: Theme.of(context).platform,
+        );
     }
   }
 
@@ -87,25 +88,6 @@ class _MyAppState extends State<MyApp>{
     // the first component is not emfpty:
     if (path[0] != '')
       return null;
-
-//    // If the path is "/stock:..." then show a stock page for the
-//    // specified stock symbol.
-//    if (path[1].startsWith('details:')) {
-//      // We don't yet support subpages of a stock, so bail if there's
-//      // any more path components.
-//      if (path.length != 2)
-//        return null;
-//      // Extract the symbol part of "stock:..." and return a route
-//      // for that symbol.
-//      final String symbol = path[1].substring(6);
-//
-//      //TODO get card
-//      var _card=null;
-//      return new MaterialPageRoute<void>(
-//        settings: settings,
-//        builder: (BuildContext context) => new DetailPage(_card),
-//      );
-//    }
     // The other paths we support are in the routes table.
     return null;
   }

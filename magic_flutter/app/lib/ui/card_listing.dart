@@ -9,7 +9,7 @@ import 'package:app/ui/about_api_page.dart';
 import 'package:app/ui/card_details.dart';
 
 enum Mode { list, grid, source }
-enum MenuItems {search, toggleGridList, about, viewSource}
+enum MenuItems {search, /*toggleGridList,*/ about, viewSource}
 
 class CardListing extends StatefulWidget {
   double offset = 0.0;
@@ -87,11 +87,38 @@ class _CardListingState extends State<CardListing> {
     this._scaffoldKey = new GlobalKey<ScaffoldState>();
     ep = getEndPoint();
 
-    return new Scaffold(
+    var sc=new Scaffold(
+      resizeToAvoidBottomPadding:false,
       key: this._scaffoldKey,
       appBar: _buildAppBar(context),
       body: _buildBody(context),
     );
+
+    return sc;
+    return new WillPopScope(
+      onWillPop: () => _exitApp(context),
+      child:sc
+    );
+  }
+  Future<bool> _exitApp(BuildContext context) {
+    return showDialog(
+      context: context,
+      child: new AlertDialog(
+        title: new Text('Do you want to exit the app?'),
+        actions: <Widget>[
+          new FlatButton(
+            textTheme: ep.epTheme.theme.buttonTheme.textTheme,
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text('No'),
+          ),
+          new FlatButton(
+            textTheme: ep.epTheme.theme.buttonTheme.textTheme,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: new Text('Yes'),
+          ),
+        ],
+      ),
+    ) ?? false;
   }
 
   _buildAppBar(BuildContext context) {
@@ -101,18 +128,17 @@ class _CardListingState extends State<CardListing> {
         actions: <Widget>[
           new IconButton(icon: const Icon(Icons.cloud), onPressed:_navigateConfig,),
           new PopupMenuButton(
-            onSelected: (MenuItems value) { _handleMenuTap(context, value); },
+            onSelected: (String value) { _handleMenuTap(context, value); },
 
-            itemBuilder: (BuildContext context) => <PopupMenuItem<MenuItems>>[
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
 
-              new PopupMenuItem<MenuItems>(value: MenuItems.search, child: const Text('Search in results'),),
-              new PopupMenuItem<MenuItems>(value: MenuItems.toggleGridList, child: const Text('Toggle list/grid mode'),),
-
-//              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:1.0, ), height:5.0, ),
+              new PopupMenuItem<String>(value: "search", child: const Text('Search in results'),),
+//              new PopupMenuItem<MenuItems>(value: MenuItems.toggleGridList, child: const Text('Toggle list/grid mode'),),
+//              new PopupMenuDivider(),
 //              new PopupMenuItem<MenuItems>(value: MenuItems.viewSource, child: const Text('View source'),),
 
-              new PopupMenuItem<MenuItems>(child: new PopupMenuDivider(height:5.0, ), height:5.0, ),
-              new PopupMenuItem<MenuItems>(value: MenuItems.about, child: const Text('About this API'),),
+              new PopupMenuDivider(),
+              new PopupMenuItem<String>(value: "about", child: const Text('About this API'),),
 
             ],
           ),
@@ -128,29 +154,29 @@ class _CardListingState extends State<CardListing> {
   _navigateConfig(){
     Navigator.pushNamed(context, '/config');
   }
-  _handleMenuTap(BuildContext context, MenuItems value) {
+  _handleMenuTap(BuildContext context, String value) {
       switch (value) {
-        case MenuItems.toggleGridList:
-          appData.logEvent('listing_toggleGridList', {'ep':ep.endpointTitle});
-          setState(() {
-            if (this.mode == Mode.list)
-              this.mode = Mode.grid;
-            else
-              this.mode = Mode.list;
+//        case MenuItems.toggleGridList:
+//          appData.logEvent('listing_toggleGridList', {'ep':ep.endpointTitle});
+//          setState(() {
+//            if (this.mode == Mode.list)
+//              this.mode = Mode.grid;
+//            else
+//              this.mode = Mode.list;
+//
+//            modeChangedAtRunTime = true;
+//          });
+//          break;
 
-            modeChangedAtRunTime = true;
-          });
+        case "about":
+          new AboutAPIPage(this.ep.about).customDialogShow(context);
           break;
 
-        case MenuItems.about:
-          new AboutAPIPage(this.ep).customDialogShow(context);
-          break;
-
-        case MenuItems.search:
+        case "search":
           _handleSearch();
           break;
 
-        case MenuItems.viewSource:
+        case "viewSource":
           setState(() {
             if (this.mode == Mode.source){
               if (ep.typeOfListing==TypeOfListing.list)
@@ -172,9 +198,7 @@ class _CardListingState extends State<CardListing> {
     var _cards=epCards();
 
     var setThemeIn10ms=(){
-      if (this.ep.theme!=null && appData.themeApplied==this.ep.theme)
-        return;
-      else if (this.ep.color!=null && appData.themeApplied==this.ep.color)
+      if (this.ep.epTheme!=null && appData.themeApplied==this.ep.epTheme)
         return;
 
       new Future.delayed(const Duration(milliseconds: 10), (){
@@ -196,11 +220,8 @@ class _CardListingState extends State<CardListing> {
             if (snapshot.hasData) {
               ep.cards = snapshot.data;
 //              return _buildGridOrList(context);
-
               setThemeIn10ms();
-
               return Center(child: CircularProgressIndicator());
-
             } else if (snapshot.hasError) {
               return _emptyState(snapshot.error);
             }
@@ -219,6 +240,8 @@ class _CardListingState extends State<CardListing> {
     else{
       if (this.ep.typeOfListing==TypeOfListing.match)
         return _buildList(context, _buildRow);
+      else if (this.ep.typeOfListing==TypeOfListing.list)
+        return _buildList(context, _buildRow);
       else
         return _buildGrid(context);
     }
@@ -228,23 +251,29 @@ class _CardListingState extends State<CardListing> {
     var _cards=epCards();
 
     //prueba, a ver si lo coge
-    _scrollController = new ScrollController(
-      initialScrollOffset: widget.getOffsetMethod(),
-      keepScrollOffset: true,
-    );
+//    _scrollController = new ScrollController(
+//      initialScrollOffset: widget.getOffsetMethod(),
+//      keepScrollOffset: true,
+//    );
 
-    return new NotificationListener(
-      child:ListView.builder(
+    var lvw=ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemCount: (_cards.length * 2) - 1,
-        controller: _scrollController,
+//        controller: _scrollController,
         itemBuilder: (context, index) {
           if (index.isOdd)
             return Divider(height:2.0);
-          else
-            return fnBuildRow(_cards[index ~/ 2], index ~/ 2, context);
+          else {
+            var nextIndex=index ~/ 2;
+            print (nextIndex);
+            return fnBuildRow(_cards[nextIndex], nextIndex, context);
+          }
         }
-      ),
+    );
+
+    return lvw;
+    return new NotificationListener(
+      child:lvw,
       onNotification: (notification) {
         if (notification is ScrollNotification) {
           widget.setOffsetMethod(notification.metrics.pixels);
@@ -257,14 +286,13 @@ class _CardListingState extends State<CardListing> {
     var title=tt.title;
     var body=tt.body1;
 
-
     var primaryColor=Theme.of(context).primaryColor;
 
     if (this.ep.typeOfListing == TypeOfListing.match) { //TypeOfListing.match
-      var f1 = card.get(this.ep.firstImage());
+      var f1 = card.get(this.ep.firstImageForListing().field);
       var s1 = (f1 != null ? f1 : ModelCard.getImgPlaceholder());
 
-      var f2 = card.get(this.ep.secondImage());
+      var f2 = card.get(this.ep.secondImageForListing().field);
       var s2 = (f2 != null ? f2 : ModelCard.getImgPlaceholder());
 
       var txt1 = card.get(this.ep.firstName());
@@ -288,8 +316,9 @@ class _CardListingState extends State<CardListing> {
 
       Widget sectionLabel;
       if (this.ep.section!=null){
-        var newSection=card.get(this.ep.section);
-        var lastSection=index==0?null: epCards()[index-1].get(this.ep.section);
+        var ff=this.ep.section.field;
+        var newSection=card.get(ff);
+        var lastSection=index==0?null: epCards()[index-1].get(ff);
 
         if (newSection!=lastSection){
           sectionLabel=new Text(newSection, style:tt.caption, textAlign: TextAlign.start,);
@@ -320,6 +349,7 @@ class _CardListingState extends State<CardListing> {
       if (txt == null) {txt = "Not found: ${this.ep.firstName()}";}
 
       return ListTile(
+        contentPadding: EdgeInsets.only(left:0.0, right:0.0),
         title: Text(txt, style: title,),
         trailing: Icon(Icons.panorama_fish_eye, color: primaryColor,),
         onTap: () {_navigateDetailPage(card, context);},
@@ -338,6 +368,7 @@ class _CardListingState extends State<CardListing> {
     var pprint=( encoder.convert( json.decode(j) ) );
 
     return ListTile(
+      contentPadding: EdgeInsets.only(left:0.0, right:0.0),
       title: Text(txt, style: Theme.of(context).textTheme.title,),
       subtitle: Text(pprint),
       trailing: Icon(Icons.code, color: Theme.of(context).primaryColor,),
@@ -357,16 +388,16 @@ class _CardListingState extends State<CardListing> {
       horizontalMargin=3.0;
     }
 
-    //prueba, a ver si lo coge
-    _scrollController = new ScrollController(
-      initialScrollOffset: widget.getOffsetMethod(),
-      keepScrollOffset: true,
-    );
+//    //prueba, a ver si lo coge
+//    _scrollController = new ScrollController(
+//      initialScrollOffset: widget.getOffsetMethod(),
+//      keepScrollOffset: true,
+//    );
 
     return new OrientationBuilder(
         builder: (context, orientation) {
           return new NotificationListener(child:new GridView.count(
-              controller: _scrollController,
+//              controller: _scrollController,
               padding: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
               mainAxisSpacing: verticalMargin,
               childAspectRatio: 1.1,
@@ -385,7 +416,7 @@ class _CardListingState extends State<CardListing> {
     );
   }
   _buildGridItem(ModelCard card, int index, BuildContext context) {
-    var fi=card.get(this.ep.firstImage());
+    var fi=card.get( this.ep.firstImageForListing().field );
     var src=(fi!=null?fi:ModelCard.getImgPlaceholder());
 
     var textStyle=Theme.of(context).textTheme.body1.copyWith(color: Colors.white);

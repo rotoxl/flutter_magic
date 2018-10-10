@@ -27,49 +27,49 @@ class EditDetailsPageState extends State<EditDetailsPage> {
 
   @override
   void initState() {
-    _fieldName = this.endPoint.firstName();
-
-    _fieldID = this.endPoint.id;
-    _fieldImage = this.endPoint.firstImage();
-
-    _fieldSecondary= this.endPoint.fields.join(", ");
-
-    _fieldNameController.text = _fieldName;
-
-    _fieldSecondaryController.text = _fieldSecondary;
-
-    return super.initState();
+//    _fieldName = this.endPoint.firstName();
+//
+//    _fieldID = this.endPoint.id;
+//    _fieldImage = this.endPoint.firstImage();
+//
+//    _fieldSecondary= this.endPoint.fields.join(", ");
+//
+//    _fieldNameController.text = _fieldName;
+//
+//    _fieldSecondaryController.text = _fieldSecondary;
+//
+//    return super.initState();
   }
 
   void _handleSubmitted() {
-    final FormState form = _formKey.currentState;
-    if (!form.validate()) {
-    } else {
-      form.save();
-
-      this.endPoint.id=_fieldID;
-      this.endPoint.images=[_fieldImage];
-      this.endPoint.name=_fieldName;
-
-//      var mainTemp=_fieldMain.split(",").map( (s) => s.trim() );
-      var secTemp=_fieldSecondary.split(",").map( (s) => s.trim() );
-
-//      this.endPoint.mainFields=mainTemp.toList();
-      this.endPoint.fields=secTemp.toList();
-
-      appData.save().then((result) {
-        print("Saving done: ${result}.");
-      });
-
-      Navigator.pop(context);
-    }
+//    final FormState form = _formKey.currentState;
+//    if (!form.validate()) {
+//    } else {
+//      form.save();
+//
+//      this.endPoint.id=_fieldID;
+//      this.endPoint.images=[_fieldImage];
+//      this.endPoint.name=_fieldName;
+//
+////      var mainTemp=_fieldMain.split(",").map( (s) => s.trim() );
+//      var secTemp=_fieldSecondary.split(",").map( (s) => s.trim() );
+//
+////      this.endPoint.mainFields=mainTemp.toList();
+//      this.endPoint.fields=secTemp.toList();
+//
+//      appData.save().then((result) {
+//        print("Saving done: ${result}.");
+//      });
+//
+//      Navigator.pop(context);
+//    }
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    //
-    var listItems = endPoint.allFields().map((String value) {
+
+    var listItems = /*endPoint.allFields()*/['**TOO', '**TODO'].map((String value) {
       return new DropdownMenuItem<String>(
         value: value,
         child: new Text(value),
