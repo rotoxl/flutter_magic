@@ -56,15 +56,14 @@ class _DetailPageState extends State<DetailPage> {
     List<Widget>allWidgets;
     if (ep.typeOfDetail==TypeOfDetail.details){
       allWidgets=detailPage(context);
-
-//    } else if (ep.typeOfDetail==TypeOfDetail.productCompare){
+    } else if (ep.typeOfDetail==TypeOfDetail.match){
+      allWidgets=matchPage();
+    }
+//     else if (ep.typeOfDetail==TypeOfDetail.productCompare){
 //      allWidgets=comparePage();
-
 //    } else if (ep.typeOfDetail==TypeOfDetail.hero){
 //      return heroPage();
-//    } else if (ep.typeOfDetail==TypeOfDetail.match){
-//      allWidgets=matchPage();
-    }
+//    }
 
     return Scaffold(
       body: CustomScrollView(
@@ -87,71 +86,27 @@ class _DetailPageState extends State<DetailPage> {
       Widget content=w.generateWidget(context, _card);
       if (content!=null)
         ret.add( content );
-
     }
-    ret.add(SizedBox(height:16.0));
-//    allWidgets.addAll([posterAndTitleBlock(), separator(),]);
-//
-//    var d=descWidget();
-//    if (d!=null) allWidgets.addAll([d, separator()]);
-//
-//    var s=secondaryFieldsWidget(_card);
-//    if (s!=null) allWidgets.addAll([s, separator()]);
-//
-//    var p=photoScroller();
-//    if (p!=null) allWidgets.addAll([p, separator()]);
+    ret.add(SizedBox(height:MARGIN_H));
 
     return ret;
   }
-//  List<Widget> comparePage(){
-//    List<Widget>allWidgets=new List<Widget>();
-//    allWidgets.addAll([
-//      new Container(color:this.theme.canvasColor, child:sidebyside( posterWName(_card, true), posterWName(_cardToCompare, false) ) ),
-//      separator(),
-//    ]);
-//
-//    allWidgets.addAll([
-//      compareFields(),
-//      separator(),
-//    ]);
-//    return allWidgets;
-//  }
-//  Widget heroPage(){
-//    var ep=getEndPoint();
-//    var src=_card.get(ep.firstImageOfType(ImageType.hero));
-//
-//    var subheadStyle=Theme.of(context).textTheme.subhead.copyWith(color: Colors.white);
-//    var headStyle=Theme.of(context).textTheme.title.copyWith(color: Colors.white);
-//
-//    var name=_card.get(ep.firstName());
-//    var text=_card.get(ep.text);
-//
-//    var ret=new Container(
-//      color: ep.epTheme.canvasColor,
-//      child:new Container(
-//        decoration: new BoxDecoration(
-//          image: new DecorationImage(image: new Image.network(src ).image, fit: BoxFit.fitHeight),
-//        ),
-//        child: new Stack(children: <Widget>[
-//          new Positioned(
-//            bottom: 40.0, left: MARGIN_H, right: MARGIN_H,
-//            child: Column(
-//              children: <Widget>[
-//                name==null?Container(): new Text(_card.get(ep.firstName()), style:headStyle, textAlign: TextAlign.center,),
-//                new Container(height: 10.0,),
-//                text==null?Container(): new Text(text, style:subheadStyle, textAlign: TextAlign.center)
-//              ],),),
-//        ],)
-//      )
-//    );
-//
-//    return new GestureDetector(child: ret, onTap: () => Navigator.pop(context, 'Nope!'),);
-//  }
-//  List<Widget> matchPage(){
-//    var tt=Theme.of(context).textTheme;
-//
-//    EndPoint ep=this.getEndPoint();
-//
+
+  List<Widget> matchPage(){
+    List<Widget>ret=new List<Widget>();
+
+    for (var i=0; i<ep.widgetsOrder.length; i++){
+      var w=ep.widgetsOrder[i];
+
+      print ('widget ${w.id}, ${w.type.toString()}');
+      Widget content=w.generateWidget(context, _card);
+      if (content!=null)
+        ret.add( content );
+    }
+    ret.add(SizedBox(height:MARGIN_H));
+
+    return ret;
+
 //    List<Widget>allWidgets=new List<Widget>();
 //    allWidgets.addAll([
 //      new Container(height:22.0, child:new Text(_card.get(ep.section), style:tt.caption, textAlign: TextAlign.start), margin:EdgeInsets.only(top:20.0, left:MARGIN_H)),
@@ -163,7 +118,6 @@ class _DetailPageState extends State<DetailPage> {
 //      ),
 //    ]);
 //
-//    //TODO Officials
 //    // allWidgets.addAll([
 //    //    separator(),
 //    //      sectionLabel('Officials'),
@@ -236,13 +190,60 @@ class _DetailPageState extends State<DetailPage> {
 //    }
 //
 //    return allWidgets;
-//  }
-  bool isNumeric(String s) {
-    if(s == null) {
-      return false;
-    }
-    return double.parse(s, (e) => null) != null;
   }
+
+
+//  List<Widget> comparePage(){
+//    List<Widget>allWidgets=new List<Widget>();
+//    allWidgets.addAll([
+//      new Container(color:this.theme.canvasColor, child:sidebyside( posterWName(_card, true), posterWName(_cardToCompare, false) ) ),
+//      separator(),
+//    ]);
+//
+//    allWidgets.addAll([
+//      compareFields(),
+//      separator(),
+//    ]);
+//    return allWidgets;
+//  }
+//  Widget heroPage(){
+//    var ep=getEndPoint();
+//    var src=_card.get(ep.firstImageOfType(ImageType.hero));
+//
+//    var subheadStyle=Theme.of(context).textTheme.subhead.copyWith(color: Colors.white);
+//    var headStyle=Theme.of(context).textTheme.title.copyWith(color: Colors.white);
+//
+//    var name=_card.get(ep.firstName());
+//    var text=_card.get(ep.text);
+//
+//    var ret=new Container(
+//      color: ep.epTheme.canvasColor,
+//      child:new Container(
+//        decoration: new BoxDecoration(
+//          image: new DecorationImage(image: new Image.network(src ).image, fit: BoxFit.fitHeight),
+//        ),
+//        child: new Stack(children: <Widget>[
+//          new Positioned(
+//            bottom: 40.0, left: MARGIN_H, right: MARGIN_H,
+//            child: Column(
+//              children: <Widget>[
+//                name==null?Container(): new Text(_card.get(ep.firstName()), style:headStyle, textAlign: TextAlign.center,),
+//                new Container(height: 10.0,),
+//                text==null?Container(): new Text(text, style:subheadStyle, textAlign: TextAlign.center)
+//              ],),),
+//        ],)
+//      )
+//    );
+//
+//    return new GestureDetector(child: ret, onTap: () => Navigator.pop(context, 'Nope!'),);
+//  }
+
+//  bool isNumeric(String s) {
+//    if(s == null) {
+//      return false;
+//    }
+//    return double.parse(s, (e) => null) != null;
+//  }
 //  List<Widget> timeLine(data){
 //    var rowHeight=60.0;
 //    var screenWidth=MediaQuery.of(context).size.width;

@@ -23,7 +23,7 @@ class EndPoint{
   String endpointUrl;
   Map<String, String> headers;
 
-  List<String> categories;
+  List<String> categories=new List<String>();
 
   EPTheme epTheme;
   EPAbout about;
@@ -35,23 +35,38 @@ class EndPoint{
   EPNameWidget names;
   EPImagesWidget images;
 
-  List<EPWidget> _widgets=new List<EPWidget>();
-  List<EPWidget> widgetsOrder=new List<EPWidget>();
+  List<EPWidget> widgets=new List<EPWidget>();
+  List<dynamic> widgetsOrder=new List<dynamic>();
 
   EndPoint({this.endpointTitle, this.endpointUrl});
 
-  EPWidget getWidgetByID(String id){
-    for (var i=0;i<_widgets.length;i++){
-      var w=_widgets[i];
+  dynamic getWidgetByID(String id){
+    for (var i=0;i<widgets.length;i++){
+      var w=widgets[i];
       if (w.id==id){
         return w;
+      } else if (w.fields.length>0){
+        for (var j=0; j<w.fields.length; j++){
+          var subw=w.fields[j];
+          if (subw.id==id) {
+            return subw;
+          }
+        }
+      } else if (w.type==EPWidgetType.images){
+        var ww=(w as EPImagesWidget);
+        for (var j=0; j<ww.images.length; j++){
+          var subw=ww.images[j];
+          if (subw.id==id) {
+            return subw;
+          }
+        }
       }
     }
     return null;
   }
   EPWidget getWidgetByType(EPWidgetType type){
-    for (var i=0;i<_widgets.length;i++){
-      var w=_widgets[i];
+    for (var i=0;i<widgets.length;i++){
+      var w=widgets[i];
       if (w.type==type){
         return w;
       }
@@ -137,7 +152,7 @@ class EndPoint{
         c.section=w;
 
       w.id=key;
-      c._widgets.add(w);
+      c.widgets.add(w);
     }
     EndPoint.swallowWidgetsOrder(c, json['widgetsOrder']);
 
@@ -161,6 +176,8 @@ class EndPoint{
     else if (td=='match')
       c.typeOfDetail=TypeOfDetail.match;
 
+    c.categories=List<String>.from(json['categories']);
+
     return c;
   }
 
@@ -173,7 +190,7 @@ class EndPoint{
         var type=fila['type'];
         var id=fila['id'];
 
-        EPWidget w;
+        dynamic w;
 
         if (id!=null){
             w=c.getWidgetByID(id);
@@ -277,7 +294,7 @@ class EPTheme{
       c.color=Colors.grey[800];
     }
 
-    if (json['theme']=='dark'){
+    if (json['base']=='dark'){
       c.theme=ThemeData.dark().copyWith(accentColor: c.color, buttonColor: c.color);
     }
     else {
@@ -333,6 +350,7 @@ enum EPWidgetType{
   text,
   stats,
   fields,
+  timeline,
 
   hero,
   header,
@@ -357,6 +375,7 @@ abstract class EPWidget{
 
   EndPoint parent;
   String id, field, title, subtitle, label, img;
+  List<EPSubItem> fields=new List<EPSubItem>();
 
   ThemeData theme;
   TextTheme textTheme;
@@ -364,7 +383,7 @@ abstract class EPWidget{
   EPWidget();
 
   Widget containerLabel(String label){
-    return Text('Desc', style: textTheme.caption.copyWith(fontSize:14.0, color: Color(0x8a000000)), textAlign: TextAlign.start,);
+    return Text(label, style: textTheme.caption.copyWith(fontSize:14.0), textAlign: TextAlign.start,);
   }
 
   setUpTheme(BuildContext context){
@@ -391,6 +410,8 @@ abstract class EPWidget{
         return EPFieldsWidget.fromJson(json);
       else if (type=='hero')
         return EPHeroWidget.fromJson(json);
+      else if (type=='timeline')
+        return EPTimelineWidget.fromJson(json);
     }
     else if (key=='name'){
       return EPNameWidget.fromJson(json);
@@ -441,15 +462,19 @@ abstract class EPWidget{
   }
 }
 
-class EPImage{
-  ImageType type;
-  String field;
-  EPImage(this.type, this.field);
+abstract class EPSubItem{
+  String id, label;
+  String left, right, field;
 }
-class _EPLabelText{
-  String field, label;
+class EPImage extends EPSubItem{
+  ImageType type;
+
+  EPImage();
+}
+class EPLabelText extends EPSubItem{
   NameType type;
-  _EPLabelText(this.field, this.label);
+
+  EPLabelText();
 }
 
 class EPTextWidget extends EPWidget{
@@ -467,6 +492,22 @@ class EPTextWidget extends EPWidget{
     if (json['label']!=null)    c.label=json['label'];
     if (json['img']!=null)      c.img=json['img'];
 
+    if (json['fields']!=null){
+      for (var i=0; i<json['fields'].length; i++){
+        var fila=json['fields'][i];
+
+        EPLabelText l=new EPLabelText();
+        l.field=fila['field'];
+
+        if (fila['id']!=null)
+          l.id=fila['id'];
+
+        l.type=NameType.name;
+        c.fields.add(l);
+      }
+
+    }
+
     return c;
   }
   Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth}) {
@@ -478,17 +519,19 @@ class EPTextWidget extends EPWidget{
       textContent.addAll( [this.containerLabel(this.label), SizedBox(height: 8.0),]);
     }
 
+    if (isLeft==null) isLeft=true;
+    var align=isLeft? TextAlign.start: TextAlign.right;
     if (this.title!=null){
       var t=card.get(this.title);
-      textContent.add( Text(t, style:this.textTheme.body1));
+      textContent.add( Text(t, style:this.textTheme.body1, textAlign: align,));
 
       if (this.subtitle!=null){
         var t=card.get(this.subtitle);
-        textContent.add( Text(t, style:this.textTheme.body2.copyWith(color: Colors.grey) ));
+        textContent.add( Text(t, style:this.textTheme.body2.copyWith(color: Colors.grey), textAlign: align, ));
       }
     } else if (this.field!=null){
       var t=card.get(this.field);
-      textContent.add( Text(t, style:this.textTheme.body1));
+      textContent.add( Text(t, style:this.textTheme.body1, textAlign: align,));
     }
 
     wContent.add(
@@ -524,9 +567,9 @@ class EPTextWidget extends EPWidget{
 }
 
 class EPFieldsWidget extends EPWidget{
-  EPWidgetType type=EPWidgetType.stats;
+  EPWidgetType type=EPWidgetType.fields;
 
-  List<_EPLabelText> fields=new List<_EPLabelText>();
+//  List<_EPLabelText> fields=new List<_EPLabelText>();
 
   EPFieldsWidget();
   factory EPFieldsWidget.fromJson(Map<String, dynamic> json) {
@@ -534,15 +577,36 @@ class EPFieldsWidget extends EPWidget{
     return reusableFactory(c, json);
   }
   static reusableFactory(EPFieldsWidget c, Map<String, dynamic> json) {
+    c.label=json['label'];
+
     var l=List<dynamic>.from(json['fields']);
     for (var i=0; i<l.length; i++){
       var fila=l[i];
       if (fila.runtimeType.toString()=='String'){
-        c.fields.add(_EPLabelText( fila, null ));
+        var e=new EPLabelText();
+        e.field=fila;
+        c.fields.add(e);
       }
       else {
         var item=Map<String, String>.from(l[i]);
-        c.fields.add(_EPLabelText( item['field'], item['label'] ));
+
+        if (item['field']!=null){
+          var e=new EPLabelText();
+          e.label=item['label'];
+          e.field=item['field'];
+
+          c.fields.add(e);
+        } else {
+          var e=new EPLabelText();
+
+          e.id=item['id'];
+          e.label=item['label'];
+          c.fields.add(e);
+
+          if (item['left']!=null)e.left=item['left'];
+          if (item['right']!=null) e.right=item['right'];
+        }
+
       }
     }
     return c;
@@ -557,23 +621,39 @@ class EPFieldsWidget extends EPWidget{
 
     for (int i=0; i<this.fields.length; i++){
       var field=this.fields[i];
-      var value=card.get(field.field);
 
-      if (value==null)
-        continue;
-      else if (value.runtimeType.toString()=='List<dynamic>')
-        value=value[0];
+      if (this.parent.typeOfDetail==TypeOfDetail.match){
 
-      try{
-        sec.add(
-          new ListTile(
-            contentPadding: EdgeInsets.only(left:0.0, right:0.0),
-            title:Text(value),
-            subtitle: Text(field.label),
-            trailing: Icon(Icons.edit_attributes, color: theme.primaryColor)
-          )
-        );
-      } catch(e, s){
+        if (field.label=='separator'){
+          sec.add(SizedBox(height:18.0));
+
+        } else {
+          var value1 = beautifulNumber(card.get(field.left));
+          var value2 = beautifulNumber(card.get(field.right));
+
+          sec.add( _valueLabelValue(value1, field.label, value2));
+        }
+
+      } else {
+        var value=beautifulNumber(card.get(field.field));
+
+        if (value==null)
+          continue;
+        else if (value.runtimeType.toString()=='List<dynamic>')
+          value=value[0];
+
+        try{
+          sec.add(
+            new ListTile(
+              contentPadding: EdgeInsets.only(left:0.0, right:0.0),
+              title:Text(value),
+              subtitle: Text(field.label),
+              trailing: Icon(Icons.edit_attributes, color: theme.primaryColor)
+            )
+          );
+        } catch(e, s){
+        }
+
       }
     }
 
@@ -581,6 +661,21 @@ class EPFieldsWidget extends EPWidget{
         //width:MediaQuery.of(context).size.width,
         margin:EdgeInsets.only(left:MARGIN_H, right:MARGIN_H, top:MARGIN_V),
         child:new Column(children:sec, crossAxisAlignment: CrossAxisAlignment.start,)
+    );
+  }
+  Widget _valueLabelValue(value1, att_text, value2){
+    return new Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(child: new Text(value1,   textAlign: TextAlign.left, style: textTheme.subhead),
+          ),
+          new Expanded(child: new Text(att_text, textAlign: TextAlign.center, style: textTheme.caption,),
+          ),
+          new Expanded(child: new Text(value2, textAlign: TextAlign.right, style: textTheme.subhead),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -622,15 +717,26 @@ class EPTagsWidget extends EPFieldsWidget{
       }
     }
 
+    var c= <Widget>[];
+    if (this.label!=null){
+      c.addAll([
+        Container(child:this.containerLabel(this.label), padding: EdgeInsets.only(left:MARGIN_H)),
+        SizedBox(height: 8.0),
+      ]);
+    }
+
+    var lvw=ListView.builder(
+      itemCount: ret.length,
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.only(top: 0.0, left: MARGIN_H),
+      itemBuilder: (BuildContext, index) => _buildChip(ret[index]),
+    );
+
+    c.add(Container(child:lvw, height: 35.0, width: maxWidth?? 400.0,));
+
     return Container(
-        height: 40.0,
-        width: maxWidth?? 400.0,
-        child: ListView.builder(
-          itemCount: ret.length,
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.only(top: 0.0, left: 0.0),
-          itemBuilder: (BuildContext, index) => _buildChip(ret[index]),
-        )
+        padding:EdgeInsets.only(top:MARGIN_V),
+        child: Column(children: c, crossAxisAlignment: CrossAxisAlignment.start,)
     );
   }
   Widget _buildChip(String value) {
@@ -703,30 +809,50 @@ class EPStatsWidget extends EPFieldsWidget{
 }
 class EPNameWidget extends EPWidget{
   EPWidgetType type=EPWidgetType.name;
-  List<_EPLabelText> fields=new List<_EPLabelText>();
+//  List<_EPLabelText> fields=new List<_EPLabelText>();
 
   EPNameWidget();
   factory EPNameWidget .fromJson(Map<String, dynamic> json) {
     var c=new EPNameWidget();
-    if (json['left']!=null){
-      var c=json['left'];
+//    if (json['left']!=null){
+//      var c=json['left'];
+//
+//      _EPLabelText l=new _EPLabelText(c['field'], null);
+//      l.type=NameType.left;
+//      c.fields.add(l);
+//
+//    }
+//    if (json['right']!=null){
+//      var c=json['left'];
+//
+//      var l=new _EPLabelText();
+//      l.field=c['field'];
+//      l.type=NameType.right;
+//
+//      c.fields.add(l);
+//    }
 
-      _EPLabelText l=new _EPLabelText(c['field'], null);
-      l.type=NameType.left;
-      c.fields.add(l);
-
-    }
-    if (json['right']!=null){
-      var c=json['left'];
-
-      _EPLabelText l=new _EPLabelText(c['field'], null);
-      l.type=NameType.right;
-      c.fields.add(l);
-    }
     if (json['field']!=null){
-      _EPLabelText l=new _EPLabelText(json['field'], null);
+      EPLabelText l=new EPLabelText();
+      l.field=json['field'];
       l.type=NameType.name;
       c.fields.add(l);
+    }
+
+    if (json['fields']!=null){
+      for (var i=0; i<json['fields'].length; i++){
+        var fila=json['fields'][i];
+
+        EPLabelText l=new EPLabelText();
+        l.field=fila['field'];
+
+        if (fila['id']!=null)
+          l.id=fila['id'];
+
+        l.type=NameType.name;
+        c.fields.add(l);
+      }
+
     }
     return c;
   }
@@ -739,10 +865,11 @@ class EPNameWidget extends EPWidget{
       texto=card.get(this.fields[0].field) ;
     }
 
+    var align=isLeft? TextAlign.start: TextAlign.right;
     if (this.type==EPWidgetType.name){
-      return Text(texto, style: Theme.of(context).textTheme.title, maxLines: 3, overflow: TextOverflow.ellipsis,);
+      return Text(texto, style: Theme.of(context).textTheme.title, maxLines: 3, overflow: TextOverflow.ellipsis, textAlign:align,);
     } else {
-      return Text(texto, style: this.textTheme.display1, );
+      return Text(texto, style: this.textTheme.display1, textAlign:align,);
     }
 
   }
@@ -753,24 +880,24 @@ class EPNameWidget extends EPWidget{
   secondName() {
     return _getNtht(1).field;
   }
-  leftName(){
-    var f=_getBySide(NameType.left);
-    if (f!=null)
-      return f.field;
-  }
-  rightName(){
-    var f=_getBySide(NameType.right);
-    if (f!=null)
-      return f.field;
-  }
-  _EPLabelText _getBySide(NameType side){
-    for (var i=0; i<this.fields.length; i++){
-      var f=this.fields[i];
-      if (f.type==side)
-        return f;
-    }
-  }
-  _EPLabelText _getNtht(int index){
+//  leftName(){
+//    var f=_getBySide(NameType.left);
+//    if (f!=null)
+//      return f.field;
+//  }
+//  rightName(){
+//    var f=_getBySide(NameType.right);
+//    if (f!=null)
+//      return f.field;
+//  }
+//  _EPLabelText _getBySide(NameType side){
+//    for (var i=0; i<this.fields.length; i++){
+//      var f=this.fields[i];
+//      if (f.type==side)
+//        return f;
+//    }
+//  }
+  EPLabelText _getNtht(int index){
 //    for (var i=0; i<this.fields.length; i++){
 //      var f=this.fields[i];
 //      return f.field;
@@ -791,13 +918,20 @@ class EPImagesWidget extends EPWidget{
     for (var i=0; i<l.length; i++){
       var fila=l[i];
 
+      var ei=EPImage();
       if (fila.runtimeType.toString()=='String'){
-        c.images.add(EPImage( ImageType.image, fila ));
+        ei.type=ImageType.image;
+        ei.field=fila;
       }
       else {
         var t={'image':ImageType.image, 'hero':ImageType.hero, 'poster':ImageType.poster, 'thumbnail':ImageType.thumbnail}[ fila['type'] ];
-        c.images.add( new EPImage(t, fila['field']));
+        ei.type=t;
+        ei.field=fila['field'];
       }
+
+      c.images.add(ei);
+      if (fila['id']!=null)
+        ei.id=fila['id'];
     }
     return c;
   }
@@ -808,7 +942,12 @@ class EPImagesWidget extends EPWidget{
       return this.images[0];
   }
   EPImage getSecondImageOfType(ImageType s){
-    return _getNthtImageOfType(s, 1);
+    if (s != ImageType.image)
+      return _getNthtImageOfType(s, 1) ?? _getNthtImageOfType(ImageType.image, 1);
+    else if (this.images.length>1)
+      return this.images[1];
+    else
+      return null;
   }
   EPImage _getNthtImageOfType(ImageType s, int index){
     var count=0;
@@ -862,7 +1001,7 @@ class EPImagesWidget extends EPWidget{
         child:Text(this.type.toString())
     );
   }
-  _buildPhotoScrollerItem(BuildContext context, String url){
+  Widget _buildPhotoScrollerItem(BuildContext context, String url){
     if (url=='') return null;
 
     var el=Padding(
@@ -897,6 +1036,168 @@ class EPHeroWidget extends EPWidget{
     return c;
   }
 }
+class EPTimelineWidget extends EPWidget{
+  EPWidgetType type=EPWidgetType.timeline;
+
+//  List<_EPLabelText> fields=new List<_EPLabelText>();
+  String transform, sort;
+  List<String>sort_strip=new List<String>();
+
+  EPTimelineWidget();
+  @override
+  Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth}) {
+    setUpTheme(context);
+
+    List<dynamic> data=_getData(card);
+    List<Widget> children=new List<Widget>();
+    if (this.label!=null){
+      children.addAll( [this.containerLabel(this.label), SizedBox(height: 8.0),]);
+    }
+    children.addAll(_timeLineWidget(context, data));
+
+    return Container(
+        height: 60.0*(data.length+1),
+//        width: MediaQuery.of(context).size.width,
+        padding:EdgeInsets.symmetric(vertical:MARGIN_V),
+        child:Column(children: children,)
+    );
+
+  }
+
+  List<Widget> _timeLineWidget(BuildContext context, List<dynamic> data){
+    var rowHeight=60.0;
+    var screenWidth=MediaQuery.of(context).size.width;
+
+    var centerColWidth=40.0;
+    var colWidth=(screenWidth-centerColWidth)/2;
+
+    var l=<Widget>[];
+
+    for (var i=0;i<data.length; i++){
+      var fila=data[i];
+
+      Container leftCol=new Container(width:colWidth); Container rightCol=new Container(width:colWidth);
+      var centerCol; var colItems;
+
+      colItems=[
+        Text(fila['time'], style:textTheme.caption),
+        Text(fila['type_of_event'], style:textTheme.caption ),
+        Expanded(child:Text(fila['player'], style:textTheme.subhead, overflow: TextOverflow.fade, maxLines: 1, softWrap: false,)),
+      ];
+
+      if (fila['side']=='left') {//isIzq
+        leftCol=new Container(width:colWidth, child:new Column(children: colItems, crossAxisAlignment: CrossAxisAlignment.end),);
+      } else {
+        rightCol=new Container(width:colWidth, child:new Column(children: colItems, crossAxisAlignment: CrossAxisAlignment.start));
+      }
+
+      double bulletTop=rowHeight/4;
+      double lineStart=0.0, lineEnd=rowHeight;
+      if (i==0){
+        lineStart=bulletTop;
+        lineEnd=rowHeight-lineStart;
+      }
+      else if (i==data.length-1){
+        lineStart=0.0;
+        lineEnd=bulletTop;
+      }
+
+      centerCol=new Container(height: rowHeight, width:centerColWidth, child: new Stack(children: <Widget>[
+            new Positioned(
+              top: lineStart, height: lineEnd, left: 25.0,
+              child: new Container(height: 20.0, width: 1.0, color: Colors.grey),
+            ),
+            new Positioned(
+              top: bulletTop-8.0, left: 16.0,
+              child: new Container(
+                margin: new EdgeInsets.all(5.0),
+                height: 10.0, width: 10.0,
+                decoration: new BoxDecoration(shape: BoxShape.circle,color: theme.accentColor),
+                ),
+              )
+          ])
+        );
+
+      l.add(new Container(height:rowHeight, width:screenWidth, child:new Row(children: <Widget>[leftCol, centerCol, rightCol] )));
+
+    }
+  return l;
+  }
+  List<dynamic> _getData(ModelCard card){
+    List<dynamic>timelinedata=[];
+
+    for (var j=0; j<this.fields.length; j++){
+      var field=this.fields[j];
+      List<dynamic>newdata=card.get(field.field);
+
+      for (var i=0; i<newdata.length; i++){
+        if (this.transform=='left/right'){
+          newdata[i]['side']= (i==0?'left':'right');
+        }
+      }
+      timelinedata.addAll(newdata);
+    }
+
+    if (this.sort!=null){
+      var whichField=this.sort;
+
+      timelinedata.sort((a,b){
+        var vala=a[whichField].toString();
+        var valb=b[whichField].toString();
+
+        if (this.sort_strip!=null){
+          List<String> l=this.sort_strip;
+
+          for (var i=0; i<l.length; i++){
+            vala=vala.replaceAll(l[i], '');
+            valb=valb.replaceAll(l[i], '');
+          }
+        }
+
+        if (isNumeric(vala) && isNumeric(valb)){
+          var numa=int.parse(vala);
+          var numb=int.parse(valb);
+
+          return numa.compareTo(numb);
+        } else {
+          return vala.compareTo(valb);
+        }
+      });
+    }
+
+    return timelinedata;
+  }
+  factory EPTimelineWidget.fromJson(Map<String, dynamic> json) {
+    var c=EPTimelineWidget();
+
+    var l=List<dynamic>.from(json['fields']);
+    for (var i=0; i<l.length; i++){
+      var fila=l[i];
+      if (fila.runtimeType.toString()=='String'){
+        var l=EPLabelText();
+        l.field=fila;
+        c.fields.add(l);
+      }
+    }
+    if (json['transform']!=null)
+      c.transform=json['transform'];
+
+    if (json['sort']!=null){
+      c.sort=json['sort'];
+
+      if (json['sort_strip']!=null)
+        c.sort_strip=List<String>.from(json['sort_strip']);
+    }
+
+    return c;
+  }
+  bool isNumeric(String s) {
+    if(s == null) {
+      return false;
+    }
+    return double.parse(s, (e) => null) != null;
+  }
+}
 class EPSeparatorWidget extends EPWidget{
   EPWidgetType type=EPWidgetType.separator;
 
@@ -906,6 +1207,7 @@ class EPSeparatorWidget extends EPWidget{
 
     return Container(
       padding: EdgeInsets.symmetric(vertical: MARGIN_V),
+      // color:Colors.red,
       decoration: new BoxDecoration(
           border: new Border(bottom: new BorderSide(color: theme.dividerColor))
       ),
@@ -916,8 +1218,8 @@ class EPHeaderWidget extends EPWidget{
 
   EPWidgetType type=EPWidgetType.header;
 
-  List<EPWidget> left=new List<EPWidget>();
-  List<EPWidget> right=new List<EPWidget>();
+  List<dynamic> left=new List<dynamic>();
+  List<dynamic> right=new List<dynamic>();
 
   EPHeaderWidget();
   factory EPHeaderWidget.fromJson(Map<String, dynamic> json, EndPoint parent) {
@@ -932,7 +1234,7 @@ class EPHeaderWidget extends EPWidget{
     return c;
   }
   static eatIt(EndPoint c, dynamic json) {
-    var ret=List<EPWidget>();
+    var ret=List<dynamic>();
 
     var l=List<dynamic>.from(json);
     for (var i=0; i<l.length; i++){
@@ -942,8 +1244,9 @@ class EPHeaderWidget extends EPWidget{
       var id=fila['id'];
 
       if (id!=null){
-        EPWidget w=c.getWidgetByID(id);
+        dynamic w=c.getWidgetByID(id);
         ret.add(w);
+
       } else if (type!=null){
         var xtype=c.getTypeForString(type);
         EPWidget w=c.getWidgetByType(xtype);
@@ -953,7 +1256,6 @@ class EPHeaderWidget extends EPWidget{
     }
     return ret;
   }
-
 
   Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth}) {
     setUpTheme(context);
@@ -980,24 +1282,42 @@ class EPHeaderWidget extends EPWidget{
       ]
     );
   }
-  Widget thisSide(BuildContext context, ModelCard card, List<EPWidget> list, bool isLeft){
+  Widget thisSide(BuildContext context, ModelCard card, List<dynamic> list, bool isLeft){
     var ret=List<Widget>();
     for (var i=0; i<list.length; i++){
       var fila=list[i];
       Widget w;
 
-      if (fila.parent==null)
-        fila.parent=this.parent;
+      if (fila is EPWidget){
+        print ('is EPWidget');
 
-      if (fila.type==EPWidgetType.images) {
-        w = poster(context, card, isLeft);
-      } else {
-        w=fila.generateWidget(context, card, isLeft:!isLeft);
+        if (fila.parent==null)
+          fila.parent=this.parent;
+
+        if (fila.type==EPWidgetType.images) {
+          EPImage field=this.parent.firstImageOfType(ImageType.poster);
+          String url=card.get(field.field);
+          w = poster(context, url, isLeft);
+
+        } else {
+          w=fila.generateWidget(context, card, isLeft:isLeft);
+        }
+
+      } else if (fila is EPImage){
+        print ('is subitem');
+
+        String url=card.get(fila.field);
+        w = poster(context, url, isLeft);
+      } else if (fila is EPLabelText){
+        String texto=card.get(fila.field);
+        w=Text(texto, style: Theme.of(context).textTheme.title, maxLines: 3, overflow: TextOverflow.ellipsis,);
       }
+
       if (w!=null){
         ret.add(w);
         if (i<list.length-1) ret.add(SizedBox(height: MARGIN_V));
       }
+
     }
     if (ret.length==1)
       return ret[0];
@@ -1011,12 +1331,9 @@ class EPHeaderWidget extends EPWidget{
       );
     }
   }
-  Widget poster(BuildContext context, ModelCard card, bool isLeft){
+  Widget poster(BuildContext context, String url, bool isLeft){
     var width = POSTER_WIDTH;
     var height= POSTER_HEIGHT;
-
-    EPImage field=this.parent.firstImageOfType(ImageType.poster);
-    String url=card.get(field.field);
 
     var doesNotWantsBox=(url.endsWith('.png'));//assume it's transparent --> no border
     var domImage=Image.network(url, fit: doesNotWantsBox?BoxFit.contain:BoxFit.cover, height: height, );

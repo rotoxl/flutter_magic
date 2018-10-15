@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app/models/end_point.dart';
@@ -73,146 +74,147 @@ class AppData{
     saveLastUsed();
   }
 
-//  ThemeData darkTheme(){
-//    return ThemeData.dark().copyWith(
-//        accentColor: Colors.grey[800],
-//        buttonColor: Colors.grey[800]
-//    );
-//  }
+  ThemeData darkTheme(){
+    return ThemeData.dark().copyWith(
+        accentColor: Colors.grey[800],
+        buttonColor: Colors.grey[800]
+    );
+  }
 
-//  _loadSportsAPI(){
-//    var match=new EndPoint(endpointTitle:'2018 Fifa WorldCup Russia', endpointUrl:'http://worldcup.sfg.io/matches', theme:darkTheme());
-//
-//    match.id='fifa_id';  //books.text='{searchInfo/textSnippet}';
-////    books.stats=['{restaurant/user_rating/aggregate_rating}', '{restaurant/user_rating/votes}'];
-////    books.tags=['{volumeInfo/maturityRating}', '{volumeInfo/printType}', '{volumeInfo/categories/0}'];
-////    match.fields=['{volumeInfo/infoLink}'/*, '{volumeInfo/authors}'*/];
-//
-//    match.section='stage_name'; //just to group listing
-//    match.names=[
-//      '{home_team/country}',
-//      '{away_team/country}'
-//    ];
-//    match.images=[
-//      "https://raw.githubusercontent.com/rotoxl/country-flags/master/png100px_by_cioc/{home_team/code}.png",
-//      "https://raw.githubusercontent.com/rotoxl/country-flags/master/png100px_by_cioc/{away_team/code}.png"
-//    ];
-//
-//    match.type='Bundled';
-//
-//    match.aboutWeb='https://worldcup.sfg.io/';
-//    match.aboutDoc='https://github.com/estiens/world_cup_json';
-//    match.aboutInfo='World cup 2018... in JSON';
-//
-//    match.typeOfListing=TypeOfListing.match;
-//    match.typeOfDetail=TypeOfDetail.match;
-//
-//    _endPoints[match.endpointTitle]=match;
-//    return match.endpointTitle;
-//  }
-//  _loadPlanetsAPI(){
-//    /*https://api.myjson.com/bins/133s70 --> https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json
-//    {
-//     "id": 1,
-//    "name": "Mercury",
-//    "mass": "0.33",
-//    "diameter": 4879,
-//    "density": 5427,
-//    "gravity": "3.7",
-//    "rotation_period": "1407.6",
-//    "length_of_day": "4222.6",
-//    "distance_from_sun": "57.9",
-//    "orbital_period": "88.0",
-//    "orbital_velocity": "47.4",
-//    "mean_temperature": 167,
-//    "number_of_moons": 0,
-//    "created_at": "2017-11-12T22:46:36.587Z",
-//    "updated_at": "2017-11-12T22:46:36.587Z",
-//    "img": "https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/mercury.jpg"
-//    }*/
-//
-//
-//  var planets=new EndPoint(endpointTitle:'Solar system (Compare)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json', theme:darkTheme() );
-//    planets.color=Colors.black;
-//
-//    planets.headers=null;
-//    planets.id='id'; planets.name='name'; planets.text=null;
-//    planets.fields=['number_of_moons', 'mass', 'diameter', 'density', 'gravity', 'mean_temperature', ];
-//
-//    planets.images=['img', 'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg'];
-//    planets.type='Bundled';
-//
-//    planets.aboutWeb='https://github.com/rotoxl/flutter_magic/blob/master/aboutPlanetsAPI.md';
-////    planets.aboutDoc='https://developers.google.com/books/docs/v1/reference/';
-//    planets.aboutInfo='Planets in our Solar System';
-//    planets.aboutLogo='https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg';
-//
-//    planets.typeOfListing=TypeOfListing.gridWithoutName;
-//    planets.typeOfDetail=TypeOfDetail.productCompare;
-//
-//    _endPoints[planets.endpointTitle]=planets;
-//
-//
-//  /*----------------*/
-//    var planetsHero=new EndPoint(endpointTitle:'Solar system (Hero)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json', theme:darkTheme() );
-//    planetsHero.color=Colors.black;
-//
-//    planetsHero.headers=null;
-//    planetsHero.id='id'; planetsHero.name='name'; planetsHero.text=null;
-//    planetsHero.fields=['number_of_moons', 'mass', 'diameter', 'density', 'gravity', 'mean_temperature', ];
-//
-//    planetsHero.images=['img', 'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg'];
-//    planetsHero.type='Bundled';
-//
-//    planetsHero.aboutWeb='https://github.com/rotoxl/flutter_magic/blob/master/aboutPlanetsAPI.md';
-////    planets.aboutDoc='https://developers.google.com/books/docs/v1/reference/';
-//    planetsHero.aboutInfo='Planets in our Solar System';
-//    planetsHero.aboutLogo='https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg';
-//
-//    planetsHero.typeOfListing=TypeOfListing.gridWithName;
-//    planetsHero.typeOfDetail=TypeOfDetail.hero;
-//
-//    _endPoints[planetsHero.endpointTitle]=planetsHero;
-//
-//  /*----------------*/
-//    var planetsDetail=new EndPoint(endpointTitle:'Solar system (Detail)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json', theme:darkTheme() );
-//    planetsDetail.color=Colors.black;
-//
-//    planetsDetail.headers=null;
-//    planetsDetail.id='id'; planetsDetail.name='name'; planetsDetail.text=null;
-//    planetsDetail.stats=['number_of_moons', 'mass'];
-//    planetsDetail.fields=['diameter', 'density', 'gravity', 'mean_temperature', 'orbital_velocity', 'orbital_period'];
-//
-//    planetsDetail.images=['img'];
-//    planetsDetail.type='Bundled';
-//
-//    planetsDetail.aboutWeb='https://github.com/rotoxl/flutter_magic/blob/master/aboutPlanetsAPI.md';
-////    planets.aboutDoc='https://developers.google.com/books/docs/v1/reference/';
-//    planetsDetail.aboutInfo='Planets in our Solar System';
-//    planetsDetail.aboutLogo='https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg';
-//
-//    planetsDetail.typeOfListing=TypeOfListing.gridWithoutName;
-//    planetsDetail.typeOfDetail=TypeOfDetail.details;
-//
-//    _endPoints[planetsDetail.endpointTitle]=planetsDetail;
-//
-//
-//
-//
-//    return planets.endpointTitle;
-//
-//  }
+
+  _loadPlanetsAPI(){
+    /*https://api.myjson.com/bins/133s70 --> https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json
+    {
+     "id": 1,
+    "name": "Mercury",
+    "mass": "0.33",
+    "diameter": 4879,
+    "density": 5427,
+    "gravity": "3.7",
+    "rotation_period": "1407.6",
+    "length_of_day": "4222.6",
+    "distance_from_sun": "57.9",
+    "orbital_period": "88.0",
+    "orbital_velocity": "47.4",
+    "mean_temperature": 167,
+    "number_of_moons": 0,
+    "created_at": "2017-11-12T22:46:36.587Z",
+    "updated_at": "2017-11-12T22:46:36.587Z",
+    "img": "https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/mercury.jpg"
+    }*/
+
+  ///common stuff
+    var epTheme=EPTheme();
+    epTheme.theme=darkTheme(); epTheme.color=Colors.black;
+
+    var about=EPAbout();
+    about.web='https://github.com/rotoxl/flutter_magic/blob/master/aboutPlanetsAPI.md';
+    about.info='Planets in our Solar System';
+    about.logo='https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.jpg';
+
+    var catList=['Science', 'Reference'];
+
+    EPWidget wname=EPNameWidget();
+    wname.field="name";
+
+    var fields=['number_of_moons', 'mass', 'diameter', 'density', 'gravity', 'mean_temperature', 'rotation_period'];
+    var labels=['Moons',           'Mass (x10e24 kg)', 'Diameter', 'Density', 'Gravity (m/s2)', 'Mean temperature', 'Rotation period (h)'];
+    EPWidget wfields=EPFieldsWidget();
+    for (var i=0; i<fields.length; i++){
+      EPSubItem e=EPLabelText();
+      e.field=fields[i];
+      e.label=labels[i];
+      wfields.fields.add(e);
+    }
+
+    EPImagesWidget wimages=EPImagesWidget();
+    var ei=EPImage();
+    ei.field='img';
+    ei.type=ImageType.image;
+    wimages.images=[ei];
+
+    EPWidget wstats=EPStatsWidget();
+    var e=EPLabelText(); e.field='number_of_moons'; e.label='Moons';
+    var f=EPLabelText(); f.field='mass'; f.label='Mass (x10e24 kg)';
+    wstats.fields=[e, f];
+
+    EPWidget whero=EPHeroWidget();
+
+    EPHeaderWidget wheaderDetail=EPHeaderWidget();
+    wheaderDetail.left=[wimages];
+    wheaderDetail.right=[wname, wstats];
+
+    EPHeaderWidget wheaderCompare=EPHeaderWidget();
+    wheaderCompare.left=[wimages];
+    wheaderCompare.right=[wname];
+
+    ///
+  var planets=new EndPoint(endpointTitle:'Solar system (Compare)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json');
+
+    planets.epTheme=epTheme;
+    planets.about=about;
+    planets.type='Bundled';
+    planets.typeOfListing=TypeOfListing.gridWithoutName;
+    planets.typeOfDetail=TypeOfDetail.productCompare;
+    planets.categories=catList;
+
+    planets.id='id';
+    planets.widgets=[wname, wfields, wimages];
+    planets.widgetsOrder=[whero, wheaderCompare, wfields, wimages];
+
+    planets.images=wimages;
+    planets.names=wname;
+    _endPoints[planets.endpointTitle]=planets;
+
+  /*----------------*/
+  var planetsHero=new EndPoint(endpointTitle:'Solar system (Hero)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json');
+
+    planetsHero.epTheme=epTheme;
+    planetsHero.about=about;
+    planetsHero.type='Bundled';
+    planetsHero.typeOfListing=TypeOfListing.gridWithName;
+    planetsHero.typeOfDetail=TypeOfDetail.hero;
+    planetsHero.categories=catList;
+
+    planetsHero.id=planets.id;
+    planetsHero.widgets=planets.widgets;
+    planetsHero.widgetsOrder=[whero, wname];
+
+    planetsHero.images=wimages;
+    planetsHero.names=wname;
+  _endPoints[planetsHero.endpointTitle]=planetsHero;
+
+  /*----------------*/
+  var planetsDetail=new EndPoint(endpointTitle:'Solar system (Detail)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json');
+
+    planetsDetail.epTheme=epTheme;
+    planetsDetail.about=about;
+    planetsDetail.type='Bundled';
+    planetsDetail.typeOfListing=TypeOfListing.gridWithoutName;
+    planetsDetail.typeOfDetail=TypeOfDetail.details;
+    planetsDetail.categories=catList;
+
+    planetsDetail.id='id';
+    planetsDetail.widgets=[wname, wfields, wimages];
+    planetsDetail.widgetsOrder=[whero, wheaderDetail, wfields, wimages];
+
+    planetsDetail.images=wimages;
+    planetsDetail.names=wname;
+    _endPoints[planetsDetail.endpointTitle]=planetsDetail;
+
+  /*----------------*/
+    return planetsDetail.endpointTitle;
+  }
 
   Future<HashMap<String, EndPoint>> loadEndPoints() async {
     print ('loadEndPoints... bundled');
 
     //bundled APIs (from https://github.com/toddmotto/public-apis)
-//    _loadSportsAPI();
-//    _loadPlanetsAPI();
+    _loadPlanetsAPI();
 
     print ('loadEndPoints... firebase.remoteconfig');
     final RemoteConfig remoteConfig = await RemoteConfig.instance;
-    await remoteConfig.fetch(expiration: const Duration(minutes: 60));
+    await remoteConfig.fetch(expiration: const Duration(minutes: 0));
     await remoteConfig.activateFetched();
     String r=remoteConfig.getString('init_endpoints');
     try{

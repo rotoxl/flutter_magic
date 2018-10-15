@@ -94,7 +94,6 @@ class _CardListingState extends State<CardListing> {
       body: _buildBody(context),
     );
 
-    return sc;
     return new WillPopScope(
       onWillPop: () => _exitApp(context),
       child:sc
@@ -201,6 +200,7 @@ class _CardListingState extends State<CardListing> {
       if (this.ep.epTheme!=null && appData.themeApplied==this.ep.epTheme)
         return;
 
+      print ('Screen repaint in 10ms');
       new Future.delayed(const Duration(milliseconds: 10), (){
         if (widget._themeUpdater!=null)
           widget._themeUpdater(appData); //forzamos tema
@@ -250,28 +250,26 @@ class _CardListingState extends State<CardListing> {
   _buildList(BuildContext context, Function(ModelCard card, int index, BuildContext context) fnBuildRow) {
     var _cards=epCards();
 
-    //prueba, a ver si lo coge
-//    _scrollController = new ScrollController(
-//      initialScrollOffset: widget.getOffsetMethod(),
-//      keepScrollOffset: true,
-//    );
+    _scrollController = new ScrollController(
+      initialScrollOffset: widget.getOffsetMethod(),
+      keepScrollOffset: true,
+    );
 
     var lvw=ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemCount: (_cards.length * 2) - 1,
-//        controller: _scrollController,
+        controller: _scrollController,
         itemBuilder: (context, index) {
           if (index.isOdd)
             return Divider(height:2.0);
           else {
             var nextIndex=index ~/ 2;
-            print (nextIndex);
+            print ('building listitem $nextIndex');
             return fnBuildRow(_cards[nextIndex], nextIndex, context);
           }
         }
     );
 
-    return lvw;
     return new NotificationListener(
       child:lvw,
       onNotification: (notification) {
@@ -388,16 +386,15 @@ class _CardListingState extends State<CardListing> {
       horizontalMargin=3.0;
     }
 
-//    //prueba, a ver si lo coge
-//    _scrollController = new ScrollController(
-//      initialScrollOffset: widget.getOffsetMethod(),
-//      keepScrollOffset: true,
-//    );
+    _scrollController = new ScrollController(
+      initialScrollOffset: widget.getOffsetMethod(),
+      keepScrollOffset: true,
+    );
 
     return new OrientationBuilder(
         builder: (context, orientation) {
           return new NotificationListener(child:new GridView.count(
-//              controller: _scrollController,
+              controller: _scrollController,
               padding: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: verticalMargin),
               mainAxisSpacing: verticalMargin,
               childAspectRatio: 1.1,
