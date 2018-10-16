@@ -105,7 +105,7 @@ class AppData{
 
   ///common stuff
     var epTheme=EPTheme();
-    epTheme.theme=darkTheme(); epTheme.color=Colors.black;
+    epTheme.theme=darkTheme().copyWith(accentColor: Colors.white); epTheme.color=Colors.black;
 
     var about=EPAbout();
     about.web='https://github.com/rotoxl/flutter_magic/blob/master/aboutPlanetsAPI.md';
@@ -114,8 +114,11 @@ class AppData{
 
     var catList=['Science', 'Reference'];
 
+    EPSeparatorWidget separator=EPSeparatorWidget();
     EPWidget wname=EPNameWidget();
-    wname.field="name";
+      var en=EPLabelText();
+      en.field="name";
+      wname.fields=[en];
 
     var fields=['number_of_moons', 'mass', 'diameter', 'density', 'gravity', 'mean_temperature', 'rotation_period'];
     var labels=['Moons',           'Mass (x10e24 kg)', 'Diameter', 'Density', 'Gravity (m/s2)', 'Mean temperature', 'Rotation period (h)'];
@@ -129,14 +132,14 @@ class AppData{
 
     EPImagesWidget wimages=EPImagesWidget();
     var ei=EPImage();
-    ei.field='img';
-    ei.type=ImageType.image;
-    wimages.images=[ei];
+      ei.field='img';
+      ei.type=ImageType.image;
+      wimages.images=[ei];
 
     EPWidget wstats=EPStatsWidget();
-    var e=EPLabelText(); e.field='number_of_moons'; e.label='Moons';
-    var f=EPLabelText(); f.field='mass'; f.label='Mass (x10e24 kg)';
-    wstats.fields=[e, f];
+      var e=EPLabelText(); e.field='number_of_moons'; e.label='Moons';
+      var f=EPLabelText(); f.field='mass'; f.label='Mass (x10e24 kg)';
+      wstats.fields=[e, f];
 
     EPWidget whero=EPHeroWidget();
 
@@ -145,8 +148,8 @@ class AppData{
     wheaderDetail.right=[wname, wstats];
 
     EPHeaderWidget wheaderCompare=EPHeaderWidget();
-    wheaderCompare.left=[wimages];
-    wheaderCompare.right=[wname];
+    wheaderCompare.left=[wimages,  separator, wname];
+    wheaderCompare.right=[wimages, separator, wname];
 
     ///
   var planets=new EndPoint(endpointTitle:'Solar system (Compare)', endpointUrl:'https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json');
@@ -160,7 +163,7 @@ class AppData{
 
     planets.id='id';
     planets.widgets=[wname, wfields, wimages];
-    planets.widgetsOrder=[whero, wheaderCompare, wfields, wimages];
+    planets.widgetsOrder=[whero, wheaderCompare, separator, wfields];
 
     planets.images=wimages;
     planets.names=wname;
@@ -196,7 +199,7 @@ class AppData{
 
     planetsDetail.id='id';
     planetsDetail.widgets=[wname, wfields, wimages];
-    planetsDetail.widgetsOrder=[whero, wheaderDetail, wfields, wimages];
+    planetsDetail.widgetsOrder=[whero, wheaderDetail, separator, wfields/*, wimages*/];
 
     planetsDetail.images=wimages;
     planetsDetail.names=wname;
