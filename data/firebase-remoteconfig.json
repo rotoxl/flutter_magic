@@ -31,6 +31,7 @@
     "name":"name",
     "__text":"text",
     "stats":["population", "area"],
+
     "tags":["region", "subregion"],
     "fields":["capital", "currencies", "topLevelDomain"],
     "related":"borders",
@@ -39,7 +40,7 @@
 
     "aboutWeb":"https://restcountries.eu/",
     "aboutDoc":"https://github.com/apilayer/restcountries/",
-    "aboutInfo":"Get information about countries via a RESTful API",
+    "aboutInfo":"Get information about countries via a RESTful API"
 },{
     "endpointTitle":"Trending movies (TheMovieDB)",
     "endpointUrl":"https://api.themoviedb.org/3/trending/all/day?api_key=a2f45e3ad3af96b2ec9d0542adbfd1da&region=ES", 
@@ -75,7 +76,6 @@
     "text":"{restaurant/location/address}\n{restaurant/location/locality}\n{restaurant/location/city}",
     "stats":["{restaurant/user_rating/aggregate_rating}", "{restaurant/user_rating/votes}"],
     "tags":["{restaurant/cuisines}"],
-    "fields":["release_date"],
     "__related":null, 
     "images":[  "{restaurant/featured_image}"],
     "type":"Bundled",

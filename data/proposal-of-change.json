@@ -1,0 +1,702 @@
+{
+"version_code": "201810022251",
+"default_endpoints": [
+{
+    "endpointTitle": "Magic: The Gathering",
+    "endpointUrl": "https://api.magicthegathering.io/v1/cards",
+    "theme": {
+        "color": "orange"
+    },
+    "categories": ["Games","Entertainment"],
+
+    "typeOfListing": "gridWithName",
+    "typeOfDetail": "detail",
+    "about": {
+        "web": "https://magicthegathering.io/",
+        "doc": "https://docs.magicthegathering.io/",
+        "info": "Join the Community of Developers building with the MTG API",
+        "logo": "https://magicthegathering.io/images/bg.jpg"
+    },
+    "widgetsOrder": [
+        {
+        "type": "hero"
+        },
+        {
+        "type": "header",
+        "right": [
+            {
+            "type": "image"
+            }
+        ],
+        "left": [
+            {
+            "id": "name"
+            },
+            {
+            "id": "MYtags"
+            },
+            {
+            "id": "MYstats"
+            }
+        ]
+        },
+        {
+        "type": "separator"
+        },
+        {
+        "id": "MYdescription"
+        },
+        {
+        "type": "separator"
+        },
+        {
+        "id": "MYfields"
+        },
+        {
+        "type": "separator"
+        },
+        {
+        "id": "MYimages"
+        }
+    ],
+    "id": "id",
+    "name": {
+        "field": "name"
+    },
+    "xhero": {
+        "type": "hero"
+    },
+    "MYdescription": {
+        "field": "text",
+        "label": "Summary"
+    },
+    "MYstats": {
+        "type": "stats",
+        "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [
+        {
+            "field": "toughness",
+            "label": "Toughness"
+        },
+        {
+            "field": "power",
+            "label": "Power"
+        },
+        {
+            "field": "cmc",
+            "label": "CMC"
+        }
+        ]
+    },
+    "MYtags": {
+        "type": "tags",
+        "fields": [
+        "types",
+        "subtypes"
+        ],
+        "label": "Tags"
+    },
+    "MYfields": {
+        "label": "Fields",
+        "type": "fields", "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [
+        {
+            "field": "artist",
+            "label": "Artist"
+        },
+        {
+            "field": "setName",
+            "label": "Set name"
+        },
+        {
+            "field": "watermark",
+            "label": "Watermark"
+        }
+        ]
+    },
+    "MYimages": {
+        "type": "images",
+        "fields": [
+        {
+            "field": "imageUrl",
+            "type": "thumbnail",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        }
+        ]
+    }
+},{
+    "endpointTitle":"2018 Fifa WorldCup Russia",
+    "endpointUrl":"http://worldcup.sfg.io/matches", 
+    "theme":{
+        "base":"dark"
+    },
+    "categories":["Sports"],
+    
+    "typeOfListing":"match",
+    "typeOfDetail":"match",
+    "about":{
+        "web":"https://worldcup.sfg.io",
+        "doc":"https://github.com/estiens/world_cup_json",
+        "info":"World cup 2018... in JSON"
+    },
+
+    "widgetsOrder":[{
+            "type": "header",
+            "left": [
+                {"id":"img-left"},
+                {"id": "name-left"},
+                {"id": "score-left"}
+            ],
+            "right": [
+                {"id":"img-right"},
+                {"id": "name-right"},
+                {"id": "score-right"}
+            ]
+            },
+            {"type": "separator"},
+            {"id": "venue"},
+            {"type": "separator"},
+            {"id": "officials"},
+            {"type": "separator"},
+            {"id": "events"}
+
+    ],
+
+    "id":"fifa_id",
+    "name":{
+        "fields":[
+            {"id":"name-left", "field": "{home_team/country}"},
+            {"id":"name-right", "field": "{away_team/country}"}
+        ]
+    },
+    "section":{"field": "stage_name"},
+    "scores":{
+        "fields":[
+            {"id":"score-left", "field": "{home_team/goals}"},
+            {"id":"score-left", "field": "{away_team/goals}"}
+        ]
+    },
+    
+    "venue":{
+        "type":"text",
+        "label":"Venue",
+        "title":"{venue}",
+        "subtitle":"{location}",
+        "img":"https://img.fifa.com/image/upload/t_tc1/wulvncwmgnfeixxsp5gv.jpg"
+    },
+
+    "fields":{
+        "label":"Stats",
+        "type":"fields", "docu":"type is one of [images, tags, text, stats, fields]",
+        "fields":[
+            {"left":"{home_team_statistics/red_cards}", "right":"{away_team_statistics/red_cards}", "label":"Red cards"},
+            {"left":"{home_team_statistics/yellow_cards}", "right":"{away_team_statistics/yellow_cards}", "label":"Yellow cards"},
+            {"label":"separator"},
+            {"left":"{home_team/penalties}", "right":"{away_team/penalties}", "label":"Penalties"},
+            {"left":"{home_team_statistics/ball_possession}", "right":"{away_team_statistics/ball_possession}", "label":"Ball possession"},
+            {"left":"{home_team_statistics/tactics}", "right":"{away_team_statistics/tactics}", "label":"Tactics"},
+            {"left":"{home_team_statistics/num_passes}", "right":"{away_team_statistics/num_passes}", "label":"Passes"},
+            {"left":"{home_team_statistics/fouls_committed}", "right":"{away_team_statistics/fouls_committed}", "label":"Fouls"}
+        ]
+    },
+    "events":{
+        "type":"timeline",
+        "fields":["home_team_events", "away_team_events"],
+        "sort":"time",
+        "sort_strip":["'"],
+        "transform":"left/right"
+    },
+
+    "images":{
+        "type":"images",
+        "fields" :[
+            {"id":"img-left", "field":"https://raw.githubusercontent.com/rotoxl/country-flags/master/png100px_by_cioc/{home_team/code}.png", "type":"poster", "docu":"one of [thumbnail, poster, hero, null]"},
+            {"id":"img-right","field":"https://raw.githubusercontent.com/rotoxl/country-flags/master/png100px_by_cioc/{away_team/code}.png", "type":"poster", "docu":"one of [thumbnail, poster, hero, null]"}
+        ]
+    },
+    "officials":{
+        "type": "tags",
+        "fields": [
+            {"field":"officials"}
+        ],
+        "label": "Officials"
+    }
+},{
+    "endpointTitle": "World Countries",
+    "endpointUrl": "https://restcountries.eu/rest/v2/all",
+    "theme": {
+        "color": "indigo"
+    },
+    "categories": ["Education", "Reference"],
+
+    "typeOfListing": "gridWithName",
+    "typeOfDetail": "detail",
+    "about": {
+        "web": "https://restcountries.eu",
+        "doc": "https://github.com/apilayer/restcountries/",
+        "info": "Get information about countries via a RESTful API"
+    },
+    "widgetsOrder": [
+        {
+        "type": "hero"
+        },
+        {
+        "type": "header",
+        "left": [
+            {
+            "type": "image"
+            }
+        ],
+        "right": [
+            {
+            "id": "name"
+            },
+            {
+            "id": "tags"
+            },
+            {
+            "id": "stats"
+            }
+        ]
+        },
+        {
+        "type": "separator"
+        },
+        {
+        "id": "fields"
+        }
+    ],
+    "id": "alpha3Code",
+    "name": {
+        "field": "name"
+    },
+    "hero": {
+        "type": "hero"
+    },
+    "stats": {
+        "type": "stats",
+        "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [
+        {
+            "field": "population",
+            "label": "Population"
+        },
+        {
+            "field": "area",
+            "label": "Area"
+        }
+        ]
+    },
+    "tags": {
+        "type": "tags",
+        "fields": [
+            "region",
+            "subregion"
+        ],
+        "label": "Tags"
+    },
+    "fields": {
+        "label": "Fields",
+        "type": "fields", "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [{
+            "field": "capital",
+            "label": "Capital"
+        },
+        {
+            "field": "currencies",
+            "label": "Currencies"
+        },
+        {
+            "field": "topLevelDomain",
+            "label": "Top level domain"
+        }]
+    },
+    "images": {
+        "type": "images",
+        "fields": [
+        {
+            "field": "https://api.backendless.com/2F26DFBF-433C-51CC-FF56-830CEA93BF00/473FB5A9-D20E-8D3E-FF01-E93D9D780A00/files/CountryFlagsPng/{alpha3Code|lower}.png",
+            "type": "thumbnail",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        }
+        ]
+    }
+},{
+    "endpointTitle": "The Movie DB/Trending Movies",
+    "endpointUrl": "https://api.themoviedb.org/3/trending/all/day?api_key=a2f45e3ad3af96b2ec9d0542adbfd1da&region=ES",
+    "theme": {
+        "color": "red"
+    },
+    "categories": ["Entertainment"],
+
+    "typeOfListing": "gridWithoutName",
+    "typeOfDetail": "detail",
+    "about": {
+        "web": "https://www.themoviedb.org",
+        "doc": "https://www.themoviedb.org/documentation/api",
+        "info": "The Movie Database (TMDb) is a popular, user editable database for movies and TV shows.",
+        "logo":"https://www.themoviedb.org/assets/1/v4/logos/312x276-primary-green-74212f6247252a023be0f02a5a45794925c3689117da9d20ffe47742a665c518.png"
+    },
+    "widgetsOrder": [
+        {"type": "hero"},{
+        "type": "header",
+            "left": [{"type": "image"}],
+            "right": [
+                {"id": "name"},
+                {"id": "stats"}
+            ]
+        },
+        {"type": "separator"},
+        {"id": "text"},
+        {"type": "separator"},
+        {"id": "fields"},
+        {"type": "separator"},
+        {"type": "images"}
+    ],
+    "id": "id",
+    "name": {
+        "field": "{original_title||original_name}"
+    },
+    "description": {
+        "field": "text",
+        "label": "Summary"
+    },
+    "hero": {
+        "type": "hero"
+    },
+    "stats": {
+        "type": "stats",
+        "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [
+        {
+            "field": "vote_average",
+            "label": "Average"
+        },
+        {
+            "field": "vote_count",
+            "label": "Vote count"
+        },
+        {
+            "field": "popularity",
+            "label": "Popularity"
+        }
+        ]
+    },
+    "fields": {
+        "label": "Fields",
+        "type": "fields", "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [{
+            "field": "release_date",
+            "label": "Release date"
+        }]
+    },
+    "images": {
+        "type": "images",
+        "fields": [
+        {
+            "field": "https://image.tmdb.org/t/p/w500/{poster_path}",
+            "type": "poster",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        },{
+            "field": "https://image.tmdb.org/t/p/w500/{backdrop_path}",
+            "type": "hero",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        }
+        ]
+    }
+},{
+    "endpointTitle": "Zomato/NY Restaurants",
+    "endpointUrl": "https://developers.zomato.com/api/v2.1/search?entity_id=280&entity_type=city",
+    "headers":{"user-key": "ab6e490707b8f2f51c864618f1ad90f4"},
+    "theme": {
+        "color": "green"
+    },
+    "categories": ["Food & drink", "Lifestyle"],
+
+    "typeOfListing": "gridWithName",
+    "typeOfDetail": "detail",
+    "about": {
+        "web": "https://www.zomato.com",
+        "doc": "https://developers.zomato.com/documentation",
+        "info":"Find the best restaurants, cafés, and bars",
+        "logo":"https://upload.wikimedia.org/wikipedia/en/thumb/0/09/Zomato_company_logo.png/240px-Zomato_company_logo.png"
+    },
+    "widgetsOrder": [
+        {"type": "hero"},{
+        "type": "header",
+            "left": [{"type": "image"}],
+            "right": [
+                {"id": "name"},
+                {"id": "tags"},
+                {"id": "stats"}
+            ]
+        },
+        {"type": "separator"},
+        {"id": "text"},
+        {"type": "separator"},
+        {"type": "images"}
+    ],
+    "id": "{restaurant/id}",
+    "name": {
+        "field": "{restaurant/name}"
+    },
+    "description": {
+        "field": "{restaurant/location/address}\n{restaurant/location/locality}\n{restaurant/location/city}",
+        "label": "Address"
+    },
+    "hero": {
+        "type": "hero"
+    },
+    "stats": {
+        "type": "stats",
+        "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [
+        {
+            "field": "{restaurant/user_rating/aggregate_rating}",
+            "label": "Average"
+        },
+        {
+            "field": "{restaurant/user_rating/votes}",
+            "label": "Vote count"
+        }
+        ]
+    },
+    "tags": {
+        "type": "tags",
+        "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [
+        {
+            "field": "{restaurant/cuisines}",
+            "label": "Average"
+        }
+        ]
+    },
+    "__fields": {
+        "label": "Fields",
+        "type": "fields", "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [{
+            "field": "release_date",
+            "label": "Release date"
+        }]
+    },
+    "images": {
+        "type": "images",
+        "fields": [
+        {
+            "field": "{restaurant/featured_image}",
+            "type": "poster",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        }
+        ]
+    }
+},{
+    "endpointTitle": "UFC Fighters",
+    "endpointUrl": "http://ufc-data-api.ufc.com/api/v3/iphone/fighters",
+    "theme": {
+        "color": "grey"
+    },
+    "categories": ["Sports"],
+
+    "typeOfListing": "gridWithName",
+    "typeOfDetail": "detail",
+    "about": {
+        "web": "http://ufc-data-api.ufc.com",
+        "doc": "http://ufc-data-api.ufc.com/api/v1/us",
+        "info":"Adept's sports focused fan engagement platform is used by some of the most recognized sports brands in the world. Ask what it can do for you"
+    },
+    "widgetsOrder": [
+        {"type": "hero"},{
+        "type": "header",
+            "left": [{"type": "image"}],
+            "right": [
+                {"id": "name"},
+                {"id": "tags"},
+                {"id": "stats"}
+            ]
+        },
+        {"type": "separator"},
+        {"id": "text"},
+        {"type": "separator"},
+        {"type": "images"}
+    ],
+    "id": "id",
+    "name": {
+        "field": "{nickname} {first_name} {last_name}"
+    },
+    "__description": {
+        "field": "{restaurant/location/address}\n{restaurant/location/locality}\n{restaurant/location/city}",
+        "label": "Address"
+    },
+    "hero": {
+        "type": "hero"
+    },
+    "stats": {
+        "type": "stats",
+        "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [
+        {
+            "field": "wins",
+            "label": "Wins"
+        },{
+            "field": "draws",
+            "label": "Draws"
+        },{
+            "field": "losses",
+            "label": "Losses"
+        }
+        ]
+    },
+    "tags": {
+        "type": "tags",
+        "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [{
+            "field": "fighter_status"
+        },{
+            "field": "rank"
+        }
+        ]
+    },
+    "fields": {
+        "label": "Fields",
+        "type": "fields", "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [{
+            "field": "link",
+            "label": "Link"
+        }]
+    },
+    "images": {
+        "type": "images",
+        "fields": [{
+            "field": "profile_image",
+            "type": "thumbnail",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        },{
+            "field": "left_full_body_image",
+            "type": "image",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        },{
+            "field": "right_full_body_image",
+            "type": "image",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        },{
+            "field": "belt_thumbnail",
+            "type": "image",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        },{
+            "field": "profile_image",
+            "type": "hero",
+            "docu": "type is one of [thumbnail, poster, hero, null]"
+        }
+        ]
+    }
+},{
+    "endpointTitle": "Google Books",
+    "endpointUrl": "https://www.googleapis.com/books/v1/volumes?q=oreilly",
+    "theme": {
+        "color": "brown"
+    },
+    "categories": ["Education", "Reference", "Entertainment"],
+
+    "typeOfListing": "gridWithoutName",
+    "typeOfDetail": "detail",
+    "about": {
+        "web": "https://books.google.es",
+        "doc": "https://developers.google.com/books/docs/v1/reference",
+        "info":"Google Books is our effort to make book content more discoverable on the Web",
+        "logo":"http://kinlane-productions.s3.amazonaws.com/api-evangelist-site/company/logos/Screen%20Shot%202017-03-16%20at%204.28.26%20PM.png"
+    },
+    "widgetsOrder": [
+        {"type": "hero"},{
+        "type": "header",
+            "left": [{"type": "image"}],
+            "right": [
+                {"id": "name"},
+                {"id": "tags"}
+            ]
+        },
+        {"type": "separator"},
+        {"id": "text"},
+        {"type": "separator"},
+        {"type": "images"}
+    ],
+    "id": "id",
+    "name": {
+        "field": "{volumeInfo/title}"
+    },
+    "description": {
+        "field": "{searchInfo/textSnippet}",
+        "label": "Description"
+    },
+    "hero": {
+        "type": "hero"
+    },
+    "tags": {
+        "type": "tags",
+        "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [{
+            "field": "{volumeInfo/maturityRating}"
+        },{
+            "field": "{volumeInfo/printType}"
+        },{
+            "field": "{volumeInfo/categories/0}"
+        }
+        ]
+    },
+    "fields": {
+        "label": "Fields",
+        "type": "fields", "docu": "type is one of [images, tags, text, stats, fields]",
+        "fields": [{
+            "field": "{volumeInfo/infoLink}",
+            "label": "Link"
+        }]
+    },
+    "images": {
+        "type": "images",
+        "fields": [{
+            "field": "{volumeInfo/imageLinks/thumbnail}",
+            "type": "poster"
+        },{
+            "field": "{volumeInfo/imageLinks/smallThumbnail}",
+            "type": "thumbnail"
+        }
+        ]
+    }
+},{
+    "endpointTitle": "Places",
+    "endpointUrl": "https://s3-eu-west-1.amazonaws.com/api-explorer-app/places/placesAPI.json",
+    "theme": {
+        "color": "green"
+    },
+    "categories": ["Photo & video", "Travel"],
+
+    "typeOfListing": "gridWithoutName",
+    "typeOfDetail": "hero",
+
+    "about": {
+        "web": "https://unsplash.com",
+        "doc": "https://unsplash.com/developers",
+        "info":"Download free (do whatever you want) high-resolution photos",
+        "__logo":""
+    },
+    "widgetsOrder": [
+        {"type": "hero"},
+        
+        {"id": "place"},
+        {"id": "author"}
+    ],
+    "id": "src",
+
+    "place": {"field": "place"},
+    "author": {"field": "author"},
+    "hero": {"type": "hero"},
+
+    "images": {
+        "type": "images",
+        "fields": [{
+            "field":"src",
+            "type": "hero"
+        }
+        ]
+    }
+}]
+}
