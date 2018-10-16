@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/models/end_point.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,7 +43,7 @@ class AboutAPIPage {
 
     var col1;
     if (this.about.logo!=null){
-      col1=Image.network(this.about.logo, fit: BoxFit.cover, width: 100.0, height: 100.0);
+      col1=CachedNetworkImage(imageUrl:this.about.logo, placeholder: new CircularProgressIndicator(), fit: BoxFit.cover, width: 100.0, height: 100.0);
     }
     else{
       col1=Container(constraints: BoxConstraints(minWidth:100.0, minHeight: 100.0),

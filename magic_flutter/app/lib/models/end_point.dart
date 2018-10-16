@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:app/ui/image_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:app/models/model_card.dart';
@@ -100,6 +101,8 @@ class EndPoint{
   }
 
   firstName(){
+    if (this.names==null)
+      return null;
     return this.names.firstName();
   }
   secondName(){
@@ -380,6 +383,7 @@ abstract class EPWidget{
   ThemeData theme;
   TextTheme textTheme;
 
+  String style; //one of subhead, title, null
   EPWidget();
 
   Widget containerLabel(String label){
@@ -543,7 +547,7 @@ class EPTextWidget extends EPWidget{
 
       var height = POSTER_RATIO * POSTER_WIDTH;
 
-      var img=new Image.network(url, fit: BoxFit.fitHeight, width: POSTER_WIDTH, height: height,);
+      var img=CachedNetworkImage(imageUrl: url, placeholder: new CircularProgressIndicator(),fit: BoxFit.fitHeight, width: POSTER_WIDTH, height: height,);
       var boxedImage=Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: img);
 
       var domImage=Expanded(
@@ -660,6 +664,34 @@ class EPFieldsWidget extends EPWidget{
     return Container(
         //width:MediaQuery.of(context).size.width,
         margin:EdgeInsets.only(left:MARGIN_H, right:MARGIN_H, top:MARGIN_V),
+        child:new Column(children:sec, crossAxisAlignment: CrossAxisAlignment.start,)
+    );
+  }
+  Widget generateWidgetCompare(BuildContext context, ModelCard card, ModelCard cardToCompare) {
+    setUpTheme(context);
+
+    var sec = <Widget>[];
+
+    if (this.label!=null)
+      sec.add( this.containerLabel(this.label) );
+
+    for (int i=0; i<this.fields.length; i++){
+      var field=this.fields[i];
+
+      if (field.label=='separator'){
+        sec.add(SizedBox(height:18.0));
+
+      } else {
+        var value1 = beautifulNumber(card.get(field.field));
+        var value2 = beautifulNumber(cardToCompare.get(field.field));
+
+        sec.add( _valueLabelValue(value1, field.label, value2));
+      }
+    }
+
+    return Container(
+      //width:MediaQuery.of(context).size.width,
+        margin:EdgeInsets.only(left:0, right:0, top:MARGIN_V),
         child:new Column(children:sec, crossAxisAlignment: CrossAxisAlignment.start,)
     );
   }
@@ -865,9 +897,12 @@ class EPNameWidget extends EPWidget{
       texto=card.get(this.fields[0].field) ;
     }
 
+    if (isLeft==null) isLeft=true;
+
+    var t=Theme.of(context);
     var align=isLeft? TextAlign.start: TextAlign.right;
     if (this.type==EPWidgetType.name){
-      return Text(texto, style: Theme.of(context).textTheme.title, maxLines: 3, overflow: TextOverflow.ellipsis, textAlign:align,);
+      return Text(texto, style: t.textTheme.title.copyWith(color:t.accentColor), maxLines: 3, overflow: TextOverflow.ellipsis, textAlign:align,);
     } else {
       return Text(texto, style: this.textTheme.display1, textAlign:align,);
     }
@@ -983,8 +1018,41 @@ class EPImagesWidget extends EPWidget{
           ret.add(value);
         }
       }
+      return _buildPhotoScrollerList(context, ret);
+    }
+  }
+  Widget generateWidgetCompare(BuildContext context, ModelCard card, ModelCard cardToCompare) {
+    setUpTheme(context);
 
-      return SizedBox.fromSize(
+    var ret=<String>[];
+    for (var i=0; i<this.images.length; i++){
+      var f=this.images[i];
+
+      for (var j=0; j<2; j++){
+        var values;
+        if (j==0)
+          values=card.get(f.field);
+        else
+          values=cardToCompare.get(f.field);
+
+        if (values==null){
+        }
+        else if (values.runtimeType.toString()=='String'){
+          ret.add(values);
+        }
+        else {
+          for (var j=0; j<values.length; j++) {
+            var value=values[j];
+            ret.add(value);
+          }
+        }
+      }
+      return _buildPhotoScrollerList(context, ret);
+    }
+  }
+
+  Widget _buildPhotoScrollerList(BuildContext context, List<String> ret){
+    return SizedBox.fromSize(
         size: Size.fromHeight(POSTER_HEIGHT+40.0),
         child: ListView.builder(
           itemCount: ret.length,
@@ -992,13 +1060,6 @@ class EPImagesWidget extends EPWidget{
           padding: EdgeInsets.only(top: MARGIN_V, left: MARGIN_H),
           itemBuilder: (BuildContext, index) => _buildPhotoScrollerItem(context, ret[index]),
         )
-      );
-    }
-
-    return Container(
-        margin:EdgeInsets.only(left:MARGIN_H, right:MARGIN_H, bottom:8.0, top:2.0),
-        color:Colors.orange,
-        child:Text(this.type.toString())
     );
   }
   Widget _buildPhotoScrollerItem(BuildContext context, String url){
@@ -1008,7 +1069,7 @@ class EPImagesWidget extends EPWidget{
       padding: new EdgeInsets.only(right: MARGIN_H, top:MARGIN_V),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(4.0),
-        child: Image.network(url, height: POSTER_HEIGHT, fit: BoxFit.scaleDown,),
+        child: CachedNetworkImage(imageUrl: url, placeholder: new CircularProgressIndicator(), height: POSTER_HEIGHT, fit: BoxFit.scaleDown,),
       ),
     );
 
@@ -1027,6 +1088,9 @@ class EPHeroWidget extends EPWidget{
 
   EPHeroWidget();
 
+  generateWidgetCompare(BuildContext context, ModelCard card, ModelCard cardToCompare) {
+    return null;
+  }
   @override
   Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth}) {
     return null;
@@ -1213,6 +1277,9 @@ class EPSeparatorWidget extends EPWidget{
       ),
     );
   }
+  Widget generateWidgetCompare(BuildContext context, ModelCard card, ModelCard cardToCompare){
+    return generateWidget(context, card);
+  }
 }
 class EPHeaderWidget extends EPWidget{
 
@@ -1256,7 +1323,17 @@ class EPHeaderWidget extends EPWidget{
     }
     return ret;
   }
+  Widget generateWidgetCompare(BuildContext context, ModelCard card, ModelCard cardToCompare){
+    setUpTheme(context);
 
+    var MARGIN_H=16.0;
+
+    var l=thisSide(context, card, this.left, true);
+    var r=thisSide(context, cardToCompare, this.right, false);
+
+    var content=<Widget>[l, SizedBox(width: MARGIN_H), r];
+    return _wrapRow(content);
+  }
   Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth}) {
     setUpTheme(context);
 
@@ -1266,43 +1343,33 @@ class EPHeaderWidget extends EPWidget{
     var r=thisSide(context, card, this.right, false);
 
     var content=<Widget>[l, SizedBox(width: MARGIN_H), r];
-
+    return _wrapRow(content);
+  }
+  Widget _wrapRow(List<Widget> content){
     return Stack(
-      alignment: AlignmentDirectional.centerStart,
-      children:[
-        Padding(padding: const EdgeInsets.only(bottom: 200.0)),
-        Positioned(
-          left:MARGIN_H, right:MARGIN_H, bottom:MARGIN_V,
-          child:Row(
+        alignment: AlignmentDirectional.centerStart,
+        children:[
+          Padding(padding: const EdgeInsets.only(bottom: 200.0)),
+          Positioned(
+              left:MARGIN_H, right:MARGIN_H, bottom:MARGIN_V,
+              child:Row(
 //            crossAxisAlignment: CrossAxisAlignment.end,
 //            mainAxisAlignment: MainAxisAlignment.end,
-            children: content,
-          )
-        ),
-      ]
+                children: content,
+              )
+          ),
+        ]
     );
   }
+
   Widget thisSide(BuildContext context, ModelCard card, List<dynamic> list, bool isLeft){
     var ret=List<Widget>();
     for (var i=0; i<list.length; i++){
       var fila=list[i];
       Widget w;
 
-      if (fila is EPWidget){
-        print ('is EPWidget');
-
-        if (fila.parent==null)
-          fila.parent=this.parent;
-
-        if (fila.type==EPWidgetType.images) {
-          EPImage field=this.parent.firstImageOfType(ImageType.poster);
-          String url=card.get(field.field);
-          w = poster(context, url, isLeft);
-
-        } else {
-          w=fila.generateWidget(context, card, isLeft:isLeft);
-        }
-
+      if (fila is EPSeparatorWidget){
+        w=SizedBox(height:MARGIN_V);
       } else if (fila is EPImage){
         print ('is subitem');
 
@@ -1311,11 +1378,28 @@ class EPHeaderWidget extends EPWidget{
       } else if (fila is EPLabelText){
         String texto=card.get(fila.field);
         w=Text(texto, style: Theme.of(context).textTheme.title, maxLines: 3, overflow: TextOverflow.ellipsis,);
+
+      } else if (fila is EPWidget){
+        print ('is EPWidget');
+
+        if (fila.parent==null)
+          fila.parent=this.parent;
+
+        if (fila.type==EPWidgetType.images) {
+          EPImage field = this.parent.firstImageOfType(ImageType.poster);
+          String url = card.get(field.field);
+          w = poster(context, url, isLeft);
+        } else if (fila.type==EPWidgetType.separator){
+          w=SizedBox(height:MARGIN_V);
+        } else {
+          w=fila.generateWidget(context, card, isLeft:isLeft);
+        }
+
       }
 
       if (w!=null){
         ret.add(w);
-        if (i<list.length-1) ret.add(SizedBox(height: MARGIN_V));
+        //if (i<list.length-1) ret.add(SizedBox(height: MARGIN_V));
       }
 
     }
@@ -1325,7 +1409,7 @@ class EPHeaderWidget extends EPWidget{
       return Expanded(
         flex:1,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: (isLeft?CrossAxisAlignment.start:CrossAxisAlignment.end),
           children: ret
         )
       );
@@ -1336,7 +1420,7 @@ class EPHeaderWidget extends EPWidget{
     var height= POSTER_HEIGHT;
 
     var doesNotWantsBox=(url.endsWith('.png'));//assume it's transparent --> no border
-    var domImage=Image.network(url, fit: doesNotWantsBox?BoxFit.contain:BoxFit.cover, height: height, );
+    var domImage=CachedNetworkImage(imageUrl:url, placeholder: new CircularProgressIndicator(), fit: doesNotWantsBox?BoxFit.contain:BoxFit.cover, height: height, );
 
     return GestureDetector(
         child:doesNotWantsBox? domImage: Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: domImage),

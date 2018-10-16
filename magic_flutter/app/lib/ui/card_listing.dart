@@ -7,6 +7,8 @@ import 'package:app/models/end_point.dart';
 import 'package:app/models/model_card.dart';
 import 'package:app/ui/about_api_page.dart';
 import 'package:app/ui/card_details.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 
 enum Mode { list, grid, source }
 enum MenuItems {search, /*toggleGridList,*/ about, viewSource}
@@ -279,6 +281,9 @@ class _CardListingState extends State<CardListing> {
       },
     );
   }
+  _imgPlaceholder(){
+    return new Center(child:Container(height:30.0, width:30.0, child:CircularProgressIndicator()));
+  }
   _buildRow(ModelCard card, int index, BuildContext context) {
     var tt=Theme.of(context).textTheme;
     var title=tt.title;
@@ -302,12 +307,12 @@ class _CardListingState extends State<CardListing> {
       var team1=new Expanded(child:new Row(children: <Widget>[
         Text(txt1, style: body),
         Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child:
-          Image.network(s1, height: 30.0, width: 40.0, fit: BoxFit.cover)
+        CachedNetworkImage(imageUrl:s1, placeholder:_imgPlaceholder(), height: 30.0, width: 40.0, fit: BoxFit.cover)
         )
       ], mainAxisAlignment: MainAxisAlignment.spaceBetween,)) ;
       var team2=new Expanded(child:new Row(children: <Widget>[
         Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child:
-          Image.network(s2, height: 30.0, width: 40.0, fit: BoxFit.cover)
+        CachedNetworkImage(imageUrl:s2, placeholder: _imgPlaceholder(), height: 30.0, width: 40.0, fit: BoxFit.cover)
         ),
         Text(txt2, style: body)
       ], mainAxisAlignment: MainAxisAlignment.spaceBetween,));
@@ -428,7 +433,7 @@ class _CardListingState extends State<CardListing> {
     var isSelected=this.selectedCards.contains(card);
 
     if (this.ep.typeOfListing==TypeOfListing.gridWithName) {
-      domImg = Image.network(src, fit: BoxFit.cover);
+      domImg = CachedNetworkImage(imageUrl:src, fit: BoxFit.cover);
 
       domTxt = Container(
           height: 30.0,
@@ -449,7 +454,7 @@ class _CardListingState extends State<CardListing> {
 
     } else if (this.ep.typeOfListing==TypeOfListing.gridWithoutName) {
 
-      domImg = Image.network(src, fit: BoxFit.fitHeight);
+      domImg = CachedNetworkImage(imageUrl:src, placeholder: _imgPlaceholder(), fit: BoxFit.fitHeight, );
 
       domcard=new Container(
         color:isSelected?Theme.of(context).accentColor:null,
@@ -505,7 +510,7 @@ class _CardListingState extends State<CardListing> {
     var tt=Theme.of(context).textTheme;
 
     var title='Unable to connect';
-    var subtitle="Maybe it's not you but we can't found the resource. Tap to try again.";
+    var subtitle="Maybe it's not you but we can't find the resource. Tap to try again.";
 
     appData.logEvent('listing_error', {'ep':appData.getCurrEndPoint().endpointTitle, 'err':err.toString()});
 
