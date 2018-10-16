@@ -15,9 +15,12 @@ class ConfigPage extends StatefulWidget {
 class _ConfigPageState extends State<ConfigPage> {
   GlobalKey<ScaffoldState> _scaffoldKey;
 
+  TextTheme textTheme;
+
   @override
   Widget build(BuildContext context) {
     this._scaffoldKey = new GlobalKey<ScaffoldState>();
+    this.textTheme=Theme.of(context).textTheme;
 
     return new Scaffold(
       key: this._scaffoldKey,
@@ -42,7 +45,7 @@ class _ConfigPageState extends State<ConfigPage> {
     _endpoints.sort((EndPoint a, EndPoint b) => a.endpointUrl.compareTo(b.endpointUrl) );
 
     return ListView.builder(
-//        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(0.0),
         itemCount:(_endpoints.length*2)-1,
         itemBuilder: (context, index) {
           if (index.isOdd)
@@ -53,30 +56,44 @@ class _ConfigPageState extends State<ConfigPage> {
   }
   Widget _buildChip(String value) {
     return Padding(
-        padding: const EdgeInsets.only(right: 8.0),
+        padding: const EdgeInsets.only(right: 2.0),
         child: Chip(
+          labelPadding: EdgeInsets.symmetric(horizontal:0.0, vertical:0.0, ) ,
+          labelStyle: this.textTheme.caption,
           label: Text(value),
-//          labelStyle: them.caption,
           backgroundColor: Colors.black12,
         ),
       );
   }
   _buildRow(EndPoint ep, BuildContext context){
-//    var l=<Widget>[];
-//    for (var i=0; i<ep.categories.length; i++){
-//      l.add(_buildChip( ep.categories[i] ));
-//    }
-//
-//    var c=Container(child:Row(children:l));
+    var l=<Widget>[];
+    for (var i=0; i<ep.categories.length; i++){
+      l.add(_buildChip( ep.categories[i] ));
+    }
+    var chips=Container(child:Row(children:l));
 
-    var row=ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal:16.0,),
-      title: Text(ep.endpointTitle, ),
-//      subtitle: c,
-      trailing: Icon(Icons.brightness_1, color: ep.epTheme.color,),
+    var row=Row(
+      children:<Widget>[
+        SizedBox(width: 20.0,),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              chips,
+              Text(ep.endpointTitle, style:this.textTheme.subhead),
+            ],
+          ),
+        ),
+        Container(
+          width:26.0,
+          child:Icon(Icons.brightness_1, color: ep.epTheme.color,),
+        ),
+        SizedBox(width: 16.0,),
+      ]
     );
 
     return new GestureDetector(
+      behavior: HitTestBehavior.opaque,
       child:row,
       onTap: () {
         var curr_ep=appData.getFixedEndPoint();
