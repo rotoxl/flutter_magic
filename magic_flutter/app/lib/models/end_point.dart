@@ -207,10 +207,16 @@ class EndPoint{
         } else if (type=='header' || type==EPWidgetType.header){
           w=new EPHeaderWidget.fromJson(fila, c);
 
+        } else if (type=='images' || type==EPWidgetType.images){
+          w=c.getWidgetByType(EPWidgetType.images);
+
         }
-        w.parent=c;
-        if (w!=null)
+
+        if (w!=null){
+          w.parent=c;
           c.widgetsOrder.add(w);
+          }
+
       }
     }
 
@@ -298,10 +304,10 @@ class EPTheme{
     }
 
     if (json['base']=='dark'){
-      c.theme=ThemeData.dark().copyWith(accentColor: c.color, buttonColor: c.color);
+      c.theme=ThemeData.dark().copyWith(accentColor: c.color, buttonColor: c.color, primaryColor: c.color);
     }
     else {
-      c.theme=ThemeData.light().copyWith(accentColor: c.color, buttonColor: c.color);
+      c.theme=ThemeData.light().copyWith(accentColor: c.color, buttonColor: c.color, primaryColor: c.color);
     }
 
     return c;
@@ -425,7 +431,6 @@ abstract class EPWidget{
   }
 
   Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth});
-
   String beautifulNumber(value){
     var orig=value;
     try{
@@ -464,11 +469,22 @@ abstract class EPWidget{
     return ret+unit;
 
   }
+
+  Widget _imgPlaceholder(){
+    return new Center(child:Container(height:30.0, width:30.0, child:CircularProgressIndicator()));
+  }
+  static bool isNumeric(String s) {
+    if(s == null) {
+      return false;
+    }
+    return double.parse(s, (e) => null) != null;
+  }
 }
 
 abstract class EPSubItem{
   String id, label;
   String left, right, field;
+  String style, effect;
 }
 class EPImage extends EPSubItem{
   ImageType type;
@@ -483,6 +499,7 @@ class EPLabelText extends EPSubItem{
 
 class EPTextWidget extends EPWidget{
   EPWidgetType type=EPWidgetType.text;
+  String effect;
 
   EPTextWidget();
 
@@ -495,6 +512,8 @@ class EPTextWidget extends EPWidget{
 
     if (json['label']!=null)    c.label=json['label'];
     if (json['img']!=null)      c.img=json['img'];
+    if (json['style']!=null)    c.style=json['style'];
+    if (json['effect']!=null)    c.effect=json['effect'];
 
     if (json['fields']!=null){
       for (var i=0; i<json['fields'].length; i++){
@@ -506,10 +525,14 @@ class EPTextWidget extends EPWidget{
         if (fila['id']!=null)
           l.id=fila['id'];
 
+        if (fila['style']!=null)
+          l.style=json['style'];
+        if (fila['effect']!=null)
+          l.effect=json['effect'];
+
         l.type=NameType.name;
         c.fields.add(l);
       }
-
     }
 
     return c;
@@ -535,7 +558,34 @@ class EPTextWidget extends EPWidget{
       }
     } else if (this.field!=null){
       var t=card.get(this.field);
-      textContent.add( Text(t, style:this.textTheme.body1, textAlign: align,));
+      var style=this.textTheme.body1;
+
+      if (this.style=='title')
+        style=this.textTheme.title;
+      else if (this.style=='subtitle')
+        style=this.textTheme.subtitle;
+      else if (this.style=='headline')
+        style=this.textTheme.headline;
+      else if (this.style=='caption')
+        style=this.textTheme.caption;
+      else if (this.style=='display1')
+        style=this.textTheme.display1;
+
+      if (this.effect=='textShadow'){
+        textContent.add(
+            new ClipRect(
+              child: new Stack(
+                children: [
+                  new Positioned(top: 1.0, left: 1.0, child: new Text(t, style: style.copyWith(color: Colors.black), textAlign: align) ),
+                  new Text(t, style: style.copyWith(color: Colors.white), textScaleFactor:1.01, textAlign: align)
+                ],
+              ),
+            )
+        );
+      }
+      else {
+        textContent.add( Text(t, style:this.textTheme.body1, textAlign: align,));
+      }
     }
 
     wContent.add(
@@ -547,7 +597,7 @@ class EPTextWidget extends EPWidget{
 
       var height = POSTER_RATIO * POSTER_WIDTH;
 
-      var img=CachedNetworkImage(imageUrl: url, placeholder: new CircularProgressIndicator(),fit: BoxFit.fitHeight, width: POSTER_WIDTH, height: height,);
+      var img=CachedNetworkImage(imageUrl: url, placeholder:_imgPlaceholder(), fit: BoxFit.fitHeight, width: POSTER_WIDTH, height: height,);
       var boxedImage=Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: img);
 
       var domImage=Expanded(
@@ -640,11 +690,6 @@ class EPFieldsWidget extends EPWidget{
 
       } else {
         var value=beautifulNumber(card.get(field.field));
-
-        if (value==null)
-          continue;
-        else if (value.runtimeType.toString()=='List<dynamic>')
-          value=value[0];
 
         try{
           sec.add(
@@ -757,10 +802,12 @@ class EPTagsWidget extends EPFieldsWidget{
       ]);
     }
 
+    if (isLeft==null) isLeft=true;
+
     var lvw=ListView.builder(
       itemCount: ret.length,
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.only(top: 0.0, left: MARGIN_H),
+      padding: EdgeInsets.only(top: 0.0, left: 0.0),
       itemBuilder: (BuildContext, index) => _buildChip(ret[index]),
     );
 
@@ -794,7 +841,7 @@ class EPStatsWidget extends EPFieldsWidget{
   Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth}){
     setUpTheme(context);
 
-    var themeBold=textTheme.headline.copyWith(fontWeight: FontWeight.w400, color: theme.primaryColor,);
+    var themeBold=textTheme.headline.copyWith(fontWeight: FontWeight.w400, color: theme.accentColor,);
     var themeSoft = textTheme.caption;
 
     var ret=<Widget>[];
@@ -902,7 +949,7 @@ class EPNameWidget extends EPWidget{
     var t=Theme.of(context);
     var align=isLeft? TextAlign.start: TextAlign.right;
     if (this.type==EPWidgetType.name){
-      return Text(texto, style: t.textTheme.title.copyWith(color:t.accentColor), maxLines: 3, overflow: TextOverflow.ellipsis, textAlign:align,);
+      return Text(texto, style: t.textTheme.title, maxLines: 3, overflow: TextOverflow.ellipsis, textAlign:TextAlign.left,);
     } else {
       return Text(texto, style: this.textTheme.display1, textAlign:align,);
     }
@@ -1018,8 +1065,8 @@ class EPImagesWidget extends EPWidget{
           ret.add(value);
         }
       }
-      return _buildPhotoScrollerList(context, ret);
     }
+    return _buildPhotoScrollerList(context, ret);
   }
   Widget generateWidgetCompare(BuildContext context, ModelCard card, ModelCard cardToCompare) {
     setUpTheme(context);
@@ -1069,7 +1116,7 @@ class EPImagesWidget extends EPWidget{
       padding: new EdgeInsets.only(right: MARGIN_H, top:MARGIN_V),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(4.0),
-        child: CachedNetworkImage(imageUrl: url, placeholder: new CircularProgressIndicator(), height: POSTER_HEIGHT, fit: BoxFit.scaleDown,),
+        child: CachedNetworkImage(imageUrl: url, placeholder: _imgPlaceholder(), height: POSTER_HEIGHT, fit: BoxFit.scaleDown,),
       ),
     );
 
@@ -1196,7 +1243,7 @@ class EPTimelineWidget extends EPWidget{
 
       for (var i=0; i<newdata.length; i++){
         if (this.transform=='left/right'){
-          newdata[i]['side']= (i==0?'left':'right');
+          newdata[i]['side']= (j==0?'left':'right');
         }
       }
       timelinedata.addAll(newdata);
@@ -1218,7 +1265,7 @@ class EPTimelineWidget extends EPWidget{
           }
         }
 
-        if (isNumeric(vala) && isNumeric(valb)){
+        if (EPWidget.isNumeric(vala) && EPWidget.isNumeric(valb)){
           var numa=int.parse(vala);
           var numb=int.parse(valb);
 
@@ -1255,12 +1302,6 @@ class EPTimelineWidget extends EPWidget{
 
     return c;
   }
-  bool isNumeric(String s) {
-    if(s == null) {
-      return false;
-    }
-    return double.parse(s, (e) => null) != null;
-  }
 }
 class EPSeparatorWidget extends EPWidget{
   EPWidgetType type=EPWidgetType.separator;
@@ -1282,7 +1323,6 @@ class EPSeparatorWidget extends EPWidget{
   }
 }
 class EPHeaderWidget extends EPWidget{
-
   EPWidgetType type=EPWidgetType.header;
 
   List<dynamic> left=new List<dynamic>();
@@ -1315,10 +1355,14 @@ class EPHeaderWidget extends EPWidget{
         ret.add(w);
 
       } else if (type!=null){
-        var xtype=c.getTypeForString(type);
-        EPWidget w=c.getWidgetByType(xtype);
-
-        ret.add(w);
+        if (type=='separator'){
+          ret.add(EPSeparatorWidget());
+          }
+        else {
+          var xtype=c.getTypeForString(type);
+          EPWidget w=c.getWidgetByType(xtype);
+          ret.add(w);
+        }
       }
     }
     return ret;
@@ -1340,7 +1384,11 @@ class EPHeaderWidget extends EPWidget{
     var MARGIN_H=16.0;
 
     var l=thisSide(context, card, this.left, true);
-    var r=thisSide(context, card, this.right, false);
+
+    var isLeft=false;
+    if (this.parent.typeOfDetail==TypeOfDetail.details)
+      isLeft=true;
+    var r=thisSide(context, card, this.right, isLeft);
 
     var content=<Widget>[l, SizedBox(width: MARGIN_H), r];
     return _wrapRow(content);
@@ -1349,7 +1397,7 @@ class EPHeaderWidget extends EPWidget{
     return Stack(
         alignment: AlignmentDirectional.centerStart,
         children:[
-          Padding(padding: const EdgeInsets.only(bottom: 200.0)),
+          Padding(padding: const EdgeInsets.only(bottom: 180.0)),
           Positioned(
               left:MARGIN_H, right:MARGIN_H, bottom:MARGIN_V,
               child:Row(
@@ -1403,13 +1451,15 @@ class EPHeaderWidget extends EPWidget{
       }
 
     }
+    if (isLeft==null)isLeft=true;
+
     if (ret.length==1)
       return ret[0];
     else {
       return Expanded(
         flex:1,
         child: Column(
-          crossAxisAlignment: (isLeft?CrossAxisAlignment.start:CrossAxisAlignment.end),
+          crossAxisAlignment: isLeft? CrossAxisAlignment.start: CrossAxisAlignment.end,
           children: ret
         )
       );
@@ -1420,7 +1470,7 @@ class EPHeaderWidget extends EPWidget{
     var height= POSTER_HEIGHT;
 
     var doesNotWantsBox=(url.endsWith('.png'));//assume it's transparent --> no border
-    var domImage=CachedNetworkImage(imageUrl:url, placeholder: new CircularProgressIndicator(), fit: doesNotWantsBox?BoxFit.contain:BoxFit.cover, height: height, );
+    var domImage=CachedNetworkImage(imageUrl:url, placeholder: _imgPlaceholder(), fit: doesNotWantsBox?BoxFit.contain:BoxFit.cover, width: width, height: height);
 
     return GestureDetector(
         child:doesNotWantsBox? domImage: Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: domImage),

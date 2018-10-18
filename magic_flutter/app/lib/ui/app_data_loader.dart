@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:app/ui/card_listing.dart';
 import 'package:app/ui/config.dart';
@@ -8,18 +9,29 @@ import 'package:app/models/end_point.dart';
 
 import 'package:app/app_data.dart';
 
-class AppDataXLoader extends StatelessWidget{
+class AppDataXLoader extends StatefulWidget{
+  final void Function(AppData p) _themeUpdater;
+  FirebaseAnalytics _analytics;
+
+  AppDataXLoader(void Function(AppData p) this._themeUpdater, FirebaseAnalytics this._analytics);
+
+  @override
+  State<StatefulWidget> createState() => new _AppDataXLoaderState(this._analytics, _themeUpdater);
+}
+
+class _AppDataXLoaderState extends State<AppDataXLoader> {
   bool _loaded=false;
+  FirebaseAnalytics _analytics;
   final void Function(AppData p) _themeUpdater;
 
-  final FirebaseAnalytics analytics;
+  DateTime whatever;
 
-  AppDataXLoader(void Function(AppData p) this._themeUpdater, FirebaseAnalytics this.analytics);
+  _AppDataXLoaderState(this._analytics, this._themeUpdater);
 
   @override
   Widget build(BuildContext context) {
     if (appData!=null)
-        appData.analytics=analytics;
+        appData.analytics=this._analytics;
 
     return new Scaffold(
       appBar: _buildAppBar(context),
@@ -54,21 +66,38 @@ class AppDataXLoader extends StatelessWidget{
         future: appData.loadEndPoints(),
         builder: (context, snapshot) {
           print ('snapshot, one more time');
-
-          if (snapshot.hasData && this._loaded==false) {
+          if (snapshot.connectionState==ConnectionState.none)
+            return Center(child:Text('No internet connection. Tap to try again'));
+          else if (snapshot.hasData && this._loaded==false) {
             this._loaded=true;
             print('loaded!');
 
             new Future.delayed(const Duration(milliseconds: 10), ()=>_navigateNext(context, snapshot));
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(//TODO sacar un Admonition
-                child:Text('Error starting app')
-            );
+            return
+              GestureDetector(
+                onTap: (){
+                  setState(() {
+                    whatever=DateTime.now();
+                  });
+                },
+                child: Center(child:Text('Error starting app. Tap to try again'))
+              );//TODO sacar un Admonition
           }
           // By default, show a loading spinner
           return Center(child: CircularProgressIndicator());
         });
   }
 
+  Future<Widget> internetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Center(child:Text('Error starting app'));
+      }
+    } on SocketException catch (_) {
+      return Center(child:Text('No internet connection'));
+    }
+  }
 }

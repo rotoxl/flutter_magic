@@ -61,16 +61,24 @@ class _DetailPageState extends State<DetailPage> {
       allWidgets=heroPage();
     }
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          appBar(),
-          SliverList(
-            delegate:new SliverChildListDelegate(allWidgets),
-          ),
-        ],
-      ),
-    );
+    if (ep.typeOfDetail==TypeOfDetail.hero){
+      return Scaffold(
+        //appBar:appBar(),
+        body: Column(children:allWidgets)
+      );
+    }
+    else {
+      return Scaffold(
+        body: CustomScrollView(
+          slivers: <Widget>[
+            appBar(),
+            SliverList(
+              delegate:new SliverChildListDelegate(allWidgets),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   List<Widget> detailPage(BuildContext context){
@@ -137,23 +145,23 @@ class _DetailPageState extends State<DetailPage> {
       }
       else {
         text.add( w.generateWidget(context, _card) );
-        text.add(SizedBox(height:MARGIN_H));
+        //text.add(SizedBox(height:8.0));
       }
     }
 //    var subheadStyle=Theme.of(context).textTheme.subhead.copyWith(color: Colors.white);
 //    var headStyle=Theme.of(context).textTheme.title.copyWith(color: Colors.white);
 //
     var ret=new Container(
-      height:size.height-100,
+      height:size.height,
       width: size.width,
       color: ep.epTheme.theme.canvasColor,
       child:new Container(
         decoration: new BoxDecoration(
-          image: new DecorationImage(image: new Image.network(src).image, fit: BoxFit.contain),
+          image: new DecorationImage(image: new Image.network(src).image, fit: BoxFit.fitHeight,),
         ),
         child: new Stack(children: <Widget>[
           new Positioned(
-            bottom: 20.0, left: MARGIN_H, right: MARGIN_H,
+            bottom: 10.0, left: MARGIN_H, right: MARGIN_H,
             child: Column(children:text)
           ),
         ],)
@@ -165,47 +173,43 @@ class _DetailPageState extends State<DetailPage> {
     ];
   }
 
-  valueForField(value) {
-    if (value == null)
-      return null;
-    else if (value.runtimeType.toString() == 'List<dynamic>')
-      return value[0];
-    else
-      return value;
-  }
   Widget appBar() {
     var ep=getEndPoint();
-
-    var h=ep.getWidgetByType(EPWidgetType.hero);
-
     var expanded_height; var domImage;
 
-    if (h!=null){
-      expanded_height=HERO_HEIGHT;
+    if (ep.typeOfDetail==TypeOfDetail.hero){
+    }
+    else {
+      var h=ep.getWidgetByType(EPWidgetType.hero);
+      if (h!=null){
+        expanded_height=HERO_HEIGHT;
 
-      var src=_card.get(ep.firstImageOfType(ImageType.hero).field );
-      if (src==null || src=='') src=ModelCard.getImgPlaceholder();
+        var src=_card.get(ep.firstImageOfType(ImageType.hero).field );
+        if (src==null || src=='') src=ModelCard.getImgPlaceholder();
 
-      domImage=Image.network(src, fit: BoxFit.cover, height: expanded_height, color: Colors.white.withOpacity(0.15),colorBlendMode: BlendMode.lighten);
-    }  else {
-      expanded_height=16.0;
-      domImage=Container();
+        domImage=Image.network(src, fit: BoxFit.cover, height: expanded_height, color: Colors.white.withOpacity(0.15),colorBlendMode: BlendMode.lighten);
+      }  else {
+        expanded_height=16.0;
+        domImage=Container();
+      }
+
+      return SliverAppBar(
+        pinned: false,
+        leading: IconButton(
+            icon: Icon(Icons.close, color:Theme.of(context).textTheme.title.color),
+            color:Theme.of(context).accentColor,
+            onPressed: () {
+              Navigator.pop(context, 'Nope!');
+            }),
+        expandedHeight: expanded_height,
+        elevation: 1.0,
+        floating: false,
+        // floating: true, snap: true,
+        flexibleSpace: new FlexibleSpaceBar(background: domImage),
+      );
     }
 
-    return SliverAppBar(
-      pinned: false,
-      leading: IconButton(
-          icon: Icon(Icons.close),
-          color:Theme.of(context).accentColor,
-          onPressed: () {
-            Navigator.pop(context, 'Nope!');
-          }),
-      expandedHeight: expanded_height,
-      elevation: 1.0,
-      floating: false,
-      // floating: true, snap: true,
-      flexibleSpace: new FlexibleSpaceBar(background: domImage),
-    );
+
   }
 
   EndPoint getEndPoint(){

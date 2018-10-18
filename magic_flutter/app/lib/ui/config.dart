@@ -44,11 +44,14 @@ class _ConfigPageState extends State<ConfigPage> {
     var _endpoints=appData.endPoints().values.toList();
     _endpoints.sort((EndPoint a, EndPoint b) => a.endpointUrl.compareTo(b.endpointUrl) );
 
+    var itemCount=(_endpoints.length*2)-1;
     return ListView.builder(
         padding: const EdgeInsets.all(0.0),
-        itemCount:(_endpoints.length*2)-1,
+        itemCount:itemCount,
         itemBuilder: (context, index) {
-          if (index.isOdd)
+          if (index==itemCount-1)
+            return SizedBox(height:28.0);
+          else if (index.isOdd)
             return Divider();
           else
             return _buildRow(_endpoints[index ~/ 2], context);

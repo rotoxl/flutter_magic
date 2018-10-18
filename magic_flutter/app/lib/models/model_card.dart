@@ -58,7 +58,14 @@ class ModelCard{
           try{
             newvalue=json;
             for (var j=0; j<temp.length; j++){
-              newvalue=newvalue[temp[j]];
+              var key=temp[j];
+
+              if (EPWidget.isNumeric(key)){
+                var num=int.parse(key);
+                newvalue=newvalue[num];
+              } else {
+                newvalue=newvalue[key];
+              }
             }
             if (newvalue.runtimeType.toString()=='List<dynamic>'){
               //warn expresión no completa
@@ -92,6 +99,9 @@ class ModelCard{
         newvalue=json[expression];
       else
         newvalue=expression;//es un literal, un valor fijo: {valor}
+
+      if (newvalue.runtimeType.toString()=='List<dynamic>')
+        newvalue=newvalue[0];
 
       return newvalue;
     }

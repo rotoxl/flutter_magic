@@ -77,7 +77,8 @@ class AppData{
   ThemeData darkTheme(){
     return ThemeData.dark().copyWith(
         accentColor: Colors.grey[800],
-        buttonColor: Colors.grey[800]
+        buttonColor: Colors.grey[800],
+        primaryColor:Colors.grey[800],
     );
   }
 
@@ -145,7 +146,7 @@ class AppData{
 
     EPHeaderWidget wheaderDetail=EPHeaderWidget();
     wheaderDetail.left=[wimages];
-    wheaderDetail.right=[wname, wstats];
+      wheaderDetail.right=[wname, separator, wstats];
 
     EPHeaderWidget wheaderCompare=EPHeaderWidget();
     wheaderCompare.left=[wimages,  separator, wname];
