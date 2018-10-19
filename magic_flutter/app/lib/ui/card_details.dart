@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:app/app_data.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:app/models/end_point.dart';
@@ -157,7 +158,7 @@ class _DetailPageState extends State<DetailPage> {
       color: ep.epTheme.theme.canvasColor,
       child:new Container(
         decoration: new BoxDecoration(
-          image: new DecorationImage(image: new Image.network(src).image, fit: BoxFit.fitHeight,),
+          image: new DecorationImage(image: new CachedNetworkImageProvider(src), fit: BoxFit.fitHeight,),
         ),
         child: new Stack(children: <Widget>[
           new Positioned(

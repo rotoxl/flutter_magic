@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:app/app_data.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:app/models/end_point.dart';
@@ -100,7 +101,9 @@ class ModelCard{
       else
         newvalue=expression;//es un literal, un valor fijo: {valor}
 
-      if (newvalue.runtimeType.toString()=='List<dynamic>')
+      if (newvalue==null)
+        return null;
+      if (newvalue.runtimeType.toString()=='List<dynamic>' && newvalue.length==1)
         newvalue=newvalue[0];
 
       return newvalue;
@@ -125,12 +128,17 @@ Future<List<ModelCard>> fetchPost(EndPoint ep) async {
 
   print ('Querying (${ep.endpointTitle}) --> ${ep.endpointUrl}');
 
-  final response = await http.get(ep.endpointUrl, headers:ep.headers);
-  if (response.statusCode == 200) {
+//  final response = await http.get(ep.endpointUrl, headers:ep.headers);
+  var cacheManager = await CacheManager.getInstance();
+  CacheManager.maxAgeCacheObject = new Duration(hours: 1);
+  final file = await cacheManager.getFile(ep.endpointUrl, headers:ep.headers);
+  var response_body=file.readAsStringSync();
+
+//  if (response.statusCode == 200) {
     var tResponse=new DateTime.now();
 
     // If the call to the server was successful, parse the JSON
-    var jsonData=json.decode(response.body);
+    var jsonData=json.decode(response_body);
     var jsonCards;
     var xtype=jsonData.runtimeType.toString();
 
@@ -170,9 +178,9 @@ Future<List<ModelCard>> fetchPost(EndPoint ep) async {
     });
 
     return cards;
-  } else {
-    // If that call was not successful, throw an error.
-    throw Exception('Failed to load post');
-  }
+//  } else {
+//    // If that call was not successful, throw an error.
+//    throw Exception('Failed to load post');
+//  }
 }
 

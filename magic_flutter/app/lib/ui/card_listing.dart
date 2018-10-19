@@ -54,7 +54,7 @@ class _CardListingState extends State<CardListing> {
     } else {
       //
       var cardsToRecycle=null;
-      //If same url has already being downloaded in another, related, endpoint --> lets recycle it
+      //If same url has already being downloaded in another, related, endpoint --> lets recycle them
       appData.endPoints().forEach((String key, EndPoint value){
         if (value.endpointUrl==ep.endpointUrl){
           if (value.cards!=null && value.cards.length>0){

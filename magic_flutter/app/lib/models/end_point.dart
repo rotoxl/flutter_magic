@@ -432,6 +432,8 @@ abstract class EPWidget{
 
   Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth});
   String beautifulNumber(value){
+    if (value==null) return null;
+
     var orig=value;
     try{
       if (value.runtimeType.toString()=='int'){
@@ -595,22 +597,24 @@ class EPTextWidget extends EPWidget{
     if (this.img!=null){
       String url=card.get(this.img);
 
-      var height = POSTER_RATIO * POSTER_WIDTH;
+      if (url!=null){
+        var height = POSTER_RATIO * POSTER_WIDTH;
 
-      var img=CachedNetworkImage(imageUrl: url, placeholder:_imgPlaceholder(), fit: BoxFit.fitHeight, width: POSTER_WIDTH, height: height,);
-      var boxedImage=Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: img);
+        var img=CachedNetworkImage(imageUrl: url, placeholder:_imgPlaceholder(), fit: BoxFit.fitHeight, width: POSTER_WIDTH, height: height,);
+        var boxedImage=Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child: img);
 
-      var domImage=Expanded(
-          flex:1,
-          child:GestureDetector(
-            child:boxedImage,
-            onTap: () {
-              navigateImagePage(url, context);
-            },
-          )
-      );
+        var domImage=Expanded(
+            flex:1,
+            child:GestureDetector(
+              child:boxedImage,
+              onTap: () {
+                navigateImagePage(url, context);
+              },
+            )
+        );
 
-      wContent.add(domImage);
+        wContent.add(domImage);
+      }
     }
 
     return Container(
@@ -673,6 +677,7 @@ class EPFieldsWidget extends EPWidget{
     if (this.label!=null)
       sec.add( this.containerLabel(this.label) );
 
+    var nonNullFieldsCount=0;
     for (int i=0; i<this.fields.length; i++){
       var field=this.fields[i];
 
@@ -691,20 +696,28 @@ class EPFieldsWidget extends EPWidget{
       } else {
         var value=beautifulNumber(card.get(field.field));
 
-        try{
-          sec.add(
-            new ListTile(
-              contentPadding: EdgeInsets.only(left:0.0, right:0.0),
-              title:Text(value),
-              subtitle: Text(field.label),
-              trailing: Icon(Icons.edit_attributes, color: theme.primaryColor)
-            )
-          );
-        } catch(e, s){
+        if (value==null) {
+          continue;
+        }
+
+          try{
+            sec.add(
+                new ListTile(
+                    contentPadding: EdgeInsets.only(left:0.0, right:0.0),
+                    title:Text(value),
+                    subtitle: Text(field.label),
+                    trailing: Icon(Icons.edit_attributes, color: theme.primaryColor)
+                )
+            );
+            nonNullFieldsCount++;
+          } catch(e, s){
+          }
         }
 
       }
-    }
+
+      if (nonNullFieldsCount==0)
+      return null;
 
     return Container(
         //width:MediaQuery.of(context).size.width,
@@ -1036,7 +1049,7 @@ class EPImagesWidget extends EPWidget{
     for (var i=0; i<this.images.length; i++){
       var img=this.images[i];
 
-      if (count==index){
+      if (count==index && (img.type==s || s==ImageType.image)) {
         return img;
       }
       if (img.type==s){
