@@ -199,7 +199,7 @@ class AppData{
     planetsDetail.categories=catList;
 
     planetsDetail.id='id';
-    planetsDetail.widgets=[wname, wfields, wimages];
+    planetsDetail.widgets=[wname, wfields, wimages, whero];
     planetsDetail.widgetsOrder=[whero, wheaderDetail, separator, wfields/*, wimages*/];
 
     planetsDetail.images=wimages;

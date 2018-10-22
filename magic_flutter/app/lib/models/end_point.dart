@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:app/ui/card_details.dart';
 import 'package:app/ui/image_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -241,6 +242,13 @@ class EndPoint{
     return null;
   }
 
+  ModelCard findCardById(String searchID) {
+    for (ModelCard c in _cards){
+      if (c.get(this.id)==searchID) return c;
+    }
+    return null;
+  }
+
 //  Map<String, dynamic> toJson() => {
 //    'title': endpointTitle,
 //    'url': endpointUrl,
@@ -360,6 +368,7 @@ enum EPWidgetType{
   stats,
   fields,
   timeline,
+  related,
 
   hero,
   header,
@@ -369,7 +378,9 @@ enum ImageType{
   poster, hero, thumbnail, image
 }
 enum NameType{
-  left, right, name
+  left, right, name,
+
+  linkToSameEndPoint, linkToOtherEndPoint,
 }
 
 abstract class EPWidget{
@@ -422,6 +433,8 @@ abstract class EPWidget{
         return EPHeroWidget.fromJson(json);
       else if (type=='timeline')
         return EPTimelineWidget.fromJson(json);
+      else if (type=='related')
+        return EPRelatedWidget.fromJson(json);
     }
     else if (key=='name'){
       return EPNameWidget.fromJson(json);
@@ -1163,7 +1176,6 @@ class EPHeroWidget extends EPWidget{
 class EPTimelineWidget extends EPWidget{
   EPWidgetType type=EPWidgetType.timeline;
 
-//  List<_EPLabelText> fields=new List<_EPLabelText>();
   String transform, sort;
   List<String>sort_strip=new List<String>();
 
@@ -1500,4 +1512,126 @@ class EPHeaderWidget extends EPWidget{
 //      return
 //    }
 //  }
+}
+class EPRelatedWidget extends EPWidget{
+  EPWidgetType type=EPWidgetType.related;
+
+  var IMG_WIDTH=80.0;
+  String shape;
+
+  EPRelatedWidget();
+  @override
+  Widget generateWidget(BuildContext context, ModelCard card, {bool isLeft, double maxWidth}) {
+    setUpTheme(context);
+
+    var ret=<EPRelatedItem>[];
+    EndPoint ep=appData.getCurrEndPoint();
+
+    for (var i=0; i<this.fields.length; i++){
+      EPLabelText f=this.fields[i];
+      var values=card.get(f.field);
+
+      if (values==null){
+      }
+      else {
+        if (values.runtimeType.toString()=='String'){
+          values=[values];
+        }
+
+        for (var j=0; j<values.length; j++) {
+          var value = values[j];
+
+          if (f.type == NameType.linkToSameEndPoint) {
+            ModelCard remote = ep.findCardById(value);
+
+            String name = remote.get(ep.firstName());
+            String url = remote.get(ep.firstImageOfType(ImageType.thumbnail).field).toString();
+
+            EPRelatedItem el=EPRelatedItem();
+            el.url=url;el.text=name; el.id=value;
+
+            ret.add(el);
+          }
+        }
+      }
+    }
+
+    List<Widget> children=new List<Widget>();
+    if (this.label!=null){
+      children.addAll( [
+        Container(child:this.containerLabel(this.label), padding: EdgeInsets.only(left:MARGIN_H, bottom: MARGIN_V)),
+        SizedBox(height: 8.0),
+      ]);
+    }
+    children.add(_buildPhotoScrollerList(context, ret));
+    return Container(
+        padding:EdgeInsets.symmetric(vertical:MARGIN_V),
+        child:Column(children: children, crossAxisAlignment: CrossAxisAlignment.start,)
+    );
+  }
+  Widget _buildPhotoScrollerList(BuildContext context, List<EPRelatedItem> ret){
+    return SizedBox.fromSize(
+        size: Size.fromHeight(IMG_WIDTH),
+        child: ListView.builder(
+          itemCount: ret.length,
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.only(top: 0, left: MARGIN_H),
+          itemBuilder: (BuildContext, index) => _buildPhotoScrollerItem(context, ret[index]),
+        )
+    );
+  }
+  Widget _buildPhotoScrollerItem(BuildContext context, EPRelatedItem fila){
+    String url=fila.url;
+
+    var el=Padding(
+      padding: new EdgeInsets.only(right: MARGIN_H, top:0),
+      child: ClipOval(
+        child: CachedNetworkImage(imageUrl: url, placeholder: _imgPlaceholder(), width: IMG_WIDTH, height: IMG_WIDTH, fit: BoxFit.fill,),
+      ),
+    );
+
+    return GestureDetector(
+      child:el,
+      onTap: () {
+        EndPoint ep=appData.getCurrEndPoint();
+        var card= ep.findCardById(fila.id);
+
+        Navigator.push(context, new MaterialPageRoute(
+            builder: (BuildContext context){
+              return new DetailPage(card);
+          }
+        ));
+      },
+    );
+  }
+  factory EPRelatedWidget.fromJson(Map<String, dynamic> json) {
+    var c=EPRelatedWidget();
+
+    var list=List<dynamic>.from(json['fields']);
+    for (var i=0; i<list.length; i++){
+      var fila=list[i];
+
+      EPLabelText l=new EPLabelText();
+      l.field=fila['field'];
+
+      if (fila['linkType']!=null){
+        if (fila['linkType']=='linkToSameEndPoint'){
+          l.type=NameType.linkToSameEndPoint;
+        } else if (fila['linkType']=='linkToOtherEndPoint'){
+          l.type=NameType.linkToOtherEndPoint;
+        }
+      }
+      else
+        l.type=NameType.linkToSameEndPoint;
+
+      c.fields.add(l);
+    }
+    if (json['shape']!=null) c.shape=json['shape'];
+    if (json['label']!=null) c.label=json['label'];
+
+    return c;
+  }
+}
+class EPRelatedItem{
+  String url, id, text, extraText;
 }
