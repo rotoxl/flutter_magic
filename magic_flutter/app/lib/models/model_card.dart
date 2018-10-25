@@ -1,11 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:app/app_data.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:http/http.dart' as http;
-
-import 'package:app/models/end_point.dart';
-
+import 'package:app/ui/widgets.dart';
 
 class ModelCard{
   String id;
@@ -123,64 +116,4 @@ class ModelCard{
   }
 }
 
-Future<List<ModelCard>> fetchPost(EndPoint ep) async {
-  var tCall=new DateTime.now();
-
-  print ('Querying (${ep.endpointTitle}) --> ${ep.endpointUrl}');
-
-//  final response = await http.get(ep.endpointUrl, headers:ep.headers);
-  var cacheManager = await CacheManager.getInstance();
-  CacheManager.maxAgeCacheObject = new Duration(hours: 1);
-  final file = await cacheManager.getFile(ep.endpointUrl, headers:ep.headers);
-  var response_body=file.readAsStringSync();
-
-//  if (response.statusCode == 200) {
-    var tResponse=new DateTime.now();
-
-    // If the call to the server was successful, parse the JSON
-    var jsonData=json.decode(response_body);
-    var jsonCards;
-    var xtype=jsonData.runtimeType.toString();
-
-    if (xtype=='List<dynamic>' || xtype.endsWith('List<dynamic>') ){
-      jsonCards=jsonData;
-    } else {
-
-      var keys=jsonData.keys.toList();
-      String finalkey;
-
-      for (var i=0; i<keys.length; i++){
-        var key=keys[i];
-        try{
-          var type=jsonData[ key ].runtimeType.toString();
-          if (type=='List<dynamic>' || type.endsWith('List<dynamic>')){
-            finalkey=key;
-            break;
-          }
-        } catch (e){
-        }
-      }
-      jsonCards=jsonData[finalkey];
-    }
-
-    var cards=List<ModelCard>();
-    for (var i=0; i<jsonCards.length; i++){
-      cards.add( ModelCard.fromJson(jsonCards[i]) );
-    }
-
-    var tProcessed=new DateTime.now();
-
-    appData.logEvent('endpoint_load', {
-      'title': ep.endpointTitle,
-      'time_to_load':tResponse.difference(tCall).inSeconds,
-      'time_to_proccess':tProcessed.difference(tResponse).inSeconds,
-      'number_of_cards':cards.length,
-    });
-
-    return cards;
-//  } else {
-//    // If that call was not successful, throw an error.
-//    throw Exception('Failed to load post');
-//  }
-}
 

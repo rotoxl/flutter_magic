@@ -7,26 +7,29 @@ import 'package:flutter/material.dart';
 
 import 'package:app/models/end_point.dart';
 import 'package:app/models/model_card.dart';
-import 'package:app/ui/image_page.dart';
 
 import 'package:app/ui/widgets.dart';
 
 class DetailPage extends StatefulWidget {
   final ModelCard _card;
   ModelCard _cardToCompare;
+  EndPoint ep;
 
-  DetailPage(this._card, {Key key}) : super(key: key);
+  DetailPage(this._card, {Key key, EndPoint this.ep}){
+    if (this.ep==null)
+      this.ep=appData.getCurrEndPoint();
+  }
+
   DetailPage.compare(this._card, this._cardToCompare, {Key key}) : super(key: key);
 
   @override
-  _DetailPageState createState() => new _DetailPageState(this._card, this._cardToCompare);
+  DetailPageState createState() => new DetailPageState(this._card, this._cardToCompare, this.ep);
 }
 
-class _DetailPageState extends State<DetailPage> {
-  EndPoint ep;
+class DetailPageState extends State<DetailPage> {
   final ModelCard _card;
   final ModelCard _cardToCompare;
-//
+
   final HERO_HEIGHT = 156.0;
   final MARGIN_H=16.0;
 
@@ -34,9 +37,11 @@ class _DetailPageState extends State<DetailPage> {
   TextTheme textTheme;
   TextStyle styleOverline, styleBody;
 
+  Map<String, List<ModelCard>> relatedCards=Map<String, List<ModelCard>>();
+  EndPoint ep;
 
-  _DetailPageState(this._card, this._cardToCompare);
-
+  DetailPageState(this._card, this._cardToCompare, this.ep);
+  
   Future<Null> editAttributes() async {
   }
 
@@ -47,9 +52,16 @@ class _DetailPageState extends State<DetailPage> {
     this.styleOverline=this.textTheme.button.copyWith(fontSize: 10.0);
     this.styleBody=this.textTheme.body1;
 
-    ep=getEndPoint();
+    appData.logEvent('detail_show', {
+      'ep':ep.endpointTitle, 
+      'typeOfDetail':ep.typeOfDetail.toString(), 
+      'card':this._card.id, 
+      'cardToCompare':this._cardToCompare!=null?this._cardToCompare.id:null
+      } 
+    );
 
-    appData.logEvent('detail_show', {'ep':ep.endpointTitle, 'typeOfDetail':ep.typeOfDetail.toString(), 'card':this._card.id, 'cardToCompare':this._cardToCompare!=null?this._cardToCompare.id:null} );
+    print ('----------------------');
+    print (this._card.json);
 
     List<Widget>allWidgets;
     if (ep.typeOfDetail==TypeOfDetail.details){
@@ -64,8 +76,7 @@ class _DetailPageState extends State<DetailPage> {
 
     if (ep.typeOfDetail==TypeOfDetail.hero){
       return Scaffold(
-        //appBar:appBar(),
-        body: Column(children:allWidgets)
+          body: Column(children:allWidgets)
       );
     }
     else {
@@ -84,12 +95,12 @@ class _DetailPageState extends State<DetailPage> {
 
   List<Widget> detailPage(BuildContext context){
     List<Widget>ret=new List<Widget>();
-
+    
     for (var i=0; i<ep.widgetsOrder.length; i++){
       EPWidget w=ep.widgetsOrder[i];
 
       w.parent=ep;
-      Widget content=w.generateWidget(context, _card);
+      Widget content=w.generateWidget(context, _card, detailPage:this);
       if (content!=null)
         ret.add( content );
     }
@@ -97,14 +108,13 @@ class _DetailPageState extends State<DetailPage> {
 
     return ret;
   }
-
   List<Widget> matchPage(){
     List<Widget>ret=new List<Widget>();
 
     for (var i=0; i<ep.widgetsOrder.length; i++){
       var w=ep.widgetsOrder[i];
 
-      print ('widget ${w.id}, ${w.type.toString()}');
+      // print ('widget ${w.id}, ${w.type.toString()}');
       Widget content=w.generateWidget(context, _card);
       if (content!=null)
         ret.add( content );
@@ -149,16 +159,14 @@ class _DetailPageState extends State<DetailPage> {
         //text.add(SizedBox(height:8.0));
       }
     }
-//    var subheadStyle=Theme.of(context).textTheme.subhead.copyWith(color: Colors.white);
-//    var headStyle=Theme.of(context).textTheme.title.copyWith(color: Colors.white);
-//
+
     var ret=new Container(
       height:size.height,
       width: size.width,
       color: ep.epTheme.theme.canvasColor,
       child:new Container(
         decoration: new BoxDecoration(
-          image: new DecorationImage(image: new CachedNetworkImageProvider(src), fit: BoxFit.fitHeight,),
+          image: new DecorationImage(image: new CachedNetworkImageProvider(this.ep.proxiedImage(src)), fit: BoxFit.fitHeight,),
         ),
         child: new Stack(children: <Widget>[
           new Positioned(
@@ -175,7 +183,6 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget appBar() {
-    var ep=getEndPoint();
     var expanded_height; var domImage;
 
     if (ep.typeOfDetail==TypeOfDetail.hero){
@@ -188,7 +195,7 @@ class _DetailPageState extends State<DetailPage> {
         var src=_card.get(ep.firstImageOfType(ImageType.hero).field );
         if (src==null || src=='') src=ModelCard.getImgPlaceholder();
 
-        domImage=Image.network(src, fit: BoxFit.cover, height: expanded_height, color: Colors.white.withOpacity(0.15),colorBlendMode: BlendMode.lighten);
+        domImage=Image.network( ep.proxiedImage(src), fit: BoxFit.cover, height: expanded_height, color: Colors.white.withOpacity(0.15),colorBlendMode: BlendMode.lighten);
       }  else {
         expanded_height=16.0;
         domImage=Container();
@@ -215,11 +222,6 @@ class _DetailPageState extends State<DetailPage> {
 
   EndPoint getEndPoint(){
     return appData.getCurrEndPoint();
-  }
-  navigateImagePage(String url, BuildContext context){
-    Navigator.push(context, new MaterialPageRoute(
-      builder: (BuildContext context) => new ImagePage(url:url),
-    ));
   }
 
   void _showSnackbar(String text, BuildContext xcontext) {

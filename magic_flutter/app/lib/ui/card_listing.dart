@@ -217,11 +217,9 @@ class _CardListingState extends State<CardListing> {
       var ep=getEndPoint();
 
       return FutureBuilder<List<ModelCard>>(
-          future: fetchPost(ep),
+          future: ep.fetchData(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              ep.cards = snapshot.data;
-//              return _buildGridOrList(context);
               setThemeIn10ms();
               return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
@@ -284,6 +282,9 @@ class _CardListingState extends State<CardListing> {
   _imgPlaceholder(){
     return new Center(child:Container(height:30.0, width:30.0, child:CircularProgressIndicator()));
   }
+  Widget _imgErrorPlaceholder({double width, double height}){
+    return new Container(color:Colors.black26, width: width??80.0, height:height??80.0,);
+  }
   _buildRow(ModelCard card, int index, BuildContext context) {
     var tt=Theme.of(context).textTheme;
     var title=tt.title;
@@ -307,12 +308,12 @@ class _CardListingState extends State<CardListing> {
       var team1=new Expanded(child:new Row(children: <Widget>[
         Text(txt1, style: body),
         Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child:
-        CachedNetworkImage(imageUrl:s1, placeholder:_imgPlaceholder(), height: 30.0, width: 40.0, fit: BoxFit.cover)
+        CachedNetworkImage(imageUrl:this.ep.proxiedImage(s1), placeholder:_imgPlaceholder(), errorWidget:_imgErrorPlaceholder(width:40.0, height:30.0), height: 30.0, width: 40.0, fit: BoxFit.cover)
         )
       ], mainAxisAlignment: MainAxisAlignment.spaceBetween,)) ;
       var team2=new Expanded(child:new Row(children: <Widget>[
         Material(borderRadius: BorderRadius.circular(4.0), elevation: 5.0, child:
-        CachedNetworkImage(imageUrl:s2, placeholder: _imgPlaceholder(), height: 30.0, width: 40.0, fit: BoxFit.cover)
+        CachedNetworkImage(imageUrl:this.ep.proxiedImage(s2), placeholder: _imgPlaceholder(), errorWidget:_imgErrorPlaceholder(width:40.0, height:30.0), height: 30.0, width: 40.0, fit: BoxFit.cover)
         ),
         Text(txt2, style: body)
       ], mainAxisAlignment: MainAxisAlignment.spaceBetween,));
@@ -376,7 +377,6 @@ class _CardListingState extends State<CardListing> {
       subtitle: Text(pprint),
       trailing: Icon(Icons.code, color: Theme.of(context).primaryColor,),
       onTap:() {
-//        Scaffold.of(context).showSnackBar(SnackBar(content:Text(card.name)));
         _navigateDetailPage(card, context);
       },
     );
@@ -419,7 +419,8 @@ class _CardListingState extends State<CardListing> {
   }
   _buildGridItem(ModelCard card, int index, BuildContext context) {
     var fi=card.get( this.ep.firstImageForListing().field );
-    var src=(fi!=null?fi:ModelCard.getImgPlaceholder());
+
+    var src=this.ep.proxiedImage( (fi!=null?fi:ModelCard.getImgPlaceholder()) );
 
     var textStyle=Theme.of(context).textTheme.body1.copyWith(color: Colors.white);
 
@@ -433,7 +434,7 @@ class _CardListingState extends State<CardListing> {
     var isSelected=this.selectedCards.contains(card);
 
     if (this.ep.typeOfListing==TypeOfListing.gridWithName) {
-      domImg = CachedNetworkImage(imageUrl:src, fit: BoxFit.cover);
+      domImg = CachedNetworkImage(imageUrl:this.ep.proxiedImage(src), fit: BoxFit.cover);
 
       domTxt = Container(
           height: 30.0,
@@ -454,7 +455,7 @@ class _CardListingState extends State<CardListing> {
 
     } else if (this.ep.typeOfListing==TypeOfListing.gridWithoutName) {
 
-      domImg = CachedNetworkImage(imageUrl:src, placeholder: _imgPlaceholder(), fit: BoxFit.fitHeight, );
+      domImg = CachedNetworkImage(imageUrl:this.ep.proxiedImage(src), placeholder: _imgPlaceholder(), errorWidget:_imgErrorPlaceholder(), fit: BoxFit.fitHeight, );
 
       domcard=new Container(
         color:isSelected?Theme.of(context).accentColor:null,

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app/models/end_point.dart';
+import 'package:app/ui/widgets.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 enum MColors{
@@ -286,6 +287,22 @@ class AppData{
         } catch (err){
           print (err);
         }
+    }
+  }
+
+  static void debugPrintSection(bool debug, String literal, dynamic json) {
+    if (debug) {
+      print (' ');
+      print (' ');
+      print (' ');
+      print ('========================');
+      debugPrint(debug, literal, json);
+    }
+  }
+  static void debugPrint(bool debug, String literal, dynamic json) {
+    if (debug){
+      print ('>'+literal);
+      print (json);
     }
   }
 
