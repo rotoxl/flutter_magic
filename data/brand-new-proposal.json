@@ -1,0 +1,74 @@
+{
+"_theaudiodbapi_key":"195003",
+
+"endpoint":{
+    "title": "_albums",
+    "url": "https://www.theaudiodb.com/api/v1/json/195003/album.php?i={i}",
+    "__url": "https://s3-eu-west-1.amazonaws.com/api-explorer-app/top20_artist/album{i}.json",
+    "parameters": [{ "name":"i", "value": 111247, "label":"Artist ID" }],
+    "imagesProxy":"https://images.weserv.nl/?url={url}",
+    "theme": {"base": "dark"},
+    "categories": ["Entertainment"],
+    "dependencies": "Billboard: Top 20 artists"
+},
+    
+"about": {
+    "web": "https://www.theaudiodb.com",
+    "doc": "https://www.theaudiodb.com/api_guide.php",
+    "info": "TheAudioDB is a community run database of Music Artwork, Metadata, Charts, Events, Music Videos and File Hashes, with free access via our front-end Website or back-end JSON API. The Data and Artwork available here, is only possible thanks to the hard work of our editors.",
+    "logo": "https://www.theaudiodb.com/images/logo_new_4.png"
+},
+
+"listing": {
+    "type":"gridWithoutName"
+},
+"detail": {
+        "type":"detail",
+        "widgetsOrder": [
+            {
+            "type": "header",
+            "left": [
+                {
+                "type": "image"
+                }
+            ],
+            "right": [{ "id": "name" }]
+            },
+            {
+            "type": "separator"
+            },
+            {
+            "id": "description"
+            }
+        ],
+        "id": "idAlbum",
+        "name": {
+            "field": "strAlbum"
+        },
+        "description": {
+            "field": "strDescriptionEN",
+            "label": "Bio"
+        },
+        "images": {
+            "type": "images",
+            "fields": [
+            {
+                "field": "strAlbumThumb",
+                "type": "poster",
+                "docu": "type is one of [thumbnail, poster, hero, null]"
+            },
+            {
+                "field": "strAlbumThumbBack",
+                "type": "image",
+                "docu": "type is one of [thumbnail, poster, hero, null]"
+            },
+            {
+                "field": "strAlbumCDart",
+                "type": "image",
+                "docu": "type is one of [thumbnail, poster, hero, null]"
+            }
+            ]
+        }
+}
+
+}

@@ -1,0 +1,57 @@
+Hi there! this is a storie about a new app, API Explorer, built on top of Flutter and Firebase.
+
+= Overview =
+API Explorer's target is to provide a tool somewhere between low and highlevel to visualize the data in an API. 
+
+Think about a data API that provides a few URLs to get a sample of raw data that interests you.
+Eg:
+    * https://www.theaudiodb.com, "TheAudioDB is a community run database of Music Artwork, Metadata, Charts, Events, Music Videos and File Hashes, with free access via our front-end Website or back-end JSON API". 
+    * Info about an artist -> https://www.theaudiodb.com/api/v1/json/1/search.php?s=the%20beatles
+    * Albums by an artist -> https://www.theaudiodb.com/api/v1/json/1/searchalbum.php?s=the%20beatles)
+
+Well, API Explorer allows anyone to go from raw data to this:
+
+    <imagen con datos en crudo> + flecha + captura de un detalle de APIExplorer
+
+The same idea is applicable to more APIs of different kind of information
+
+    <imagen con los ejemplos de plantilla=detail>
+
+Can you see the pattern? All the samples follow the same design!
+
+    <imagen del patrón>
+
+
+Wait: but what if data doesn't follow this structure?
+    Well, the template is flexible, did you notice that Mars' screenshot doesn't have a description? what about the tags? 
+    Also, there are a few templates more, each one suitable for a different use case, and it's even possible to link several templates to one data API.
+
+    <imagen con las distintas plantillas>
+
+
+Under the hood
+    It all starts with a public data API:
+        https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json
+    
+    API Explorer reads & parses it
+
+
+
+
+Enter the template model
+
+
+--
+Note: API Explorer is not affiliated with, or in any way associated with any of the APIs described here
+
+
+
+
+
+The series will contain the following articles
+* Overview
+    At first API Explorer only needs a data API EndPoint
+* Lists and grids
+* Templates ('detail', 'compare', 'hero', 'match')
+* Advanced templating (hint:it's all json)
+* My experience building it with Flutter
