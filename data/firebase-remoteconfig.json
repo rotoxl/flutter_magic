@@ -788,7 +788,7 @@
       }
     },
     {
-      "endpointTitle": "last.fm: Top Artists",
+      "endpointTitle": "_last.fm: Top Artists (Beta)",
       "endpointUrl": "http://ws.audioscrobbler.com/2.0/?method=chart.gettopartists&api_key=a75185adbaec912b811ba1a63a931b59&format=json",
       "endpointPath":"artists/artist",
       "theme": {
@@ -817,17 +817,14 @@
               "type": "image"
             }
           ],
-          "left": [{ "id": "name", "align":"right"}]
+          "left": [
+            { "id": "name", "align":"right"}, 
+            {"type": "separator"},
+            {"id":"stats"}
+          ]
         },
-        {
-          "type": "separator"
-        },
-        {
-          "type": "fields"
-        },
-        {
-          "id": "albums"
-        }
+        {"type": "separator"},
+        {"id": "albums"}
       ],
       "id": "id",
       "name": {
@@ -835,24 +832,6 @@
       },
       "hero": {
         "type": "hero"
-      },
-      "fields": {
-        "type": "fields",
-        "docu": "type is one of [images, tags, text, stats, fields]",
-        "fields": [
-          {
-            "field": "playcount",
-            "label": "Origin"
-          },
-          {
-            "field": "listeners",
-            "label": "listeners"
-          },
-          {
-            "field": "More info",
-            "label": "url"
-          }
-        ]
       },
       "images": {
         "type": "images",
@@ -872,14 +851,27 @@
           {
             "linkType": "linkToOtherEndPoint",
 
-            "endPointTitle": "_albums",
+            "endPointTitle": "_albums (Beta)",
             "endPointParameter": { "i": "name" }
+          }
+        ]
+      },
+      "stats": {
+        "type": "stats",
+        "fields": [
+          {
+            "field": "playcount",
+            "label": "Playcount"
+          },
+          {
+            "field": "listeners",
+            "label": "Listeners"
           }
         ]
       }
     },
     {
-      "endpointTitle": "_albums",
+      "endpointTitle": "_albums (Beta)",
       "endpointUrl": "http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist={i}&api_key=a75185adbaec912b811ba1a63a931b59&format=json",
       "endpointParameters": [{ "name":"i", "value": "the beatles", "label":"Artist name" }],
       "endpointPath":"topalbums/album",
@@ -887,7 +879,6 @@
       
       "theme": {"color": "yellow"},
       "categories": ["Entertainment"],
-      "dependencies": "last.fm: Top Artists",
 
       "typeOfListing": "gridWithoutName",
       "typeOfDetail": "detail",
@@ -901,11 +892,9 @@
         {
           "type": "header",
           "left": [
-            {
-              "type": "image"
-            }
+            {"type": "image"}
           ],
-          "right": [{ "id": "name" }]
+          "right": [{ "id": "name" }, {"type": "stats"}]
         },
         {
           "type": "separator"
@@ -925,6 +914,19 @@
             "field": "{image/3/#text}",
             "type": "poster",
             "docu": "type is one of [thumbnail, poster, hero, null]"
+          }
+        ]
+      }, 
+      "stats": {
+        "type": "stats",
+        "fields": [
+          {
+            "field": "playcount",
+            "label": "Playcount"
+          },
+          {
+            "field": "listeners",
+            "label": "Listeners"
           }
         ]
       }
