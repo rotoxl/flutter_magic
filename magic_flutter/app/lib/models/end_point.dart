@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:app/ui/widgets.dart';
@@ -19,7 +18,7 @@ enum TypeOfDetail{
 }
 
 class EndPoint{
-  static bool debug=false;
+  static bool debug_showLog=false;
 
   TypeOfListing typeOfListing=TypeOfListing.gridWithName;
   TypeOfDetail typeOfDetail=TypeOfDetail.details;
@@ -132,15 +131,15 @@ class EndPoint{
   factory EndPoint.fromJson(Map<String, dynamic> json) {
     var c=EndPoint();
 
-    AppData.debugPrintSection(EndPoint.debug, 'endpointTitle', json['endpointTitle']);
+    AppData.debugPrintSection(EndPoint.debug_showLog, 'endpointTitle', json['endpointTitle']);
     c.endpointTitle=json['endpointTitle'];
 
     c.endpointUrl=json['endpointUrl'];
-    AppData.debugPrint(debug, 'headers', json['headers']);
+    AppData.debugPrint(debug_showLog, 'headers', json['headers']);
     if (json['headers']!=null)
       c.headers=Map<String, String>.from(json['headers']);
 
-    AppData.debugPrint(debug, 'endpointParameters', json['endpointParameters']);
+    AppData.debugPrint(debug_showLog, 'endpointParameters', json['endpointParameters']);
     if (json['endpointParameters']!=null)
       c.endpointParameters=List<Map<String, dynamic>>.from(json['endpointParameters']);
 
@@ -151,11 +150,11 @@ class EndPoint{
       c.endpointPath=json['endpointPath'];
 
 
-    AppData.debugPrint(debug, 'dependencies', json['dependencies']);
+    AppData.debugPrint(debug_showLog, 'dependencies', json['dependencies']);
     if (json['dependencies']!=null)
       c.dependencies=json['dependencies'];
 
-    AppData.debugPrint(debug, 'theme', json['theme']);
+    AppData.debugPrint(debug_showLog, 'theme', json['theme']);
     if (json['theme']!=null)
       c.epTheme=EPTheme.fromJson( json['theme'] );
     else {
@@ -175,7 +174,7 @@ class EndPoint{
         continue;
 
       try{
-        AppData.debugPrint(debug, key, json[key]);
+        AppData.debugPrint(debug_showLog, key, json[key]);
         w=EPWidget.fromJson(key, json[key]);
       } catch (e){
         print (e);
@@ -289,7 +288,7 @@ class EndPoint{
 
     var tCall=new DateTime.now();
 
-    AppData.debugPrint(debug, this.endpointTitle, null);
+    AppData.debugPrint(debug_showLog, this.endpointTitle, null);
     String url=this.endpointUrl;
 
     if (parameters==null && endpointParameters!=null){
@@ -303,7 +302,7 @@ class EndPoint{
       });
     }
 
-    AppData.debugPrint(debug, "parameters", parameters);
+    AppData.debugPrint(debug_showLog, "parameters", parameters);
 
     if (parameters!=null){
       parameters.forEach((String k, String v){
@@ -311,9 +310,9 @@ class EndPoint{
       });
     }
 
-    AppData.debugPrint (debug, 'Querying (${this.endpointTitle})', url);
+    AppData.debugPrint (debug_showLog, 'Querying (${this.endpointTitle})', url);
 
-    CacheManager.showDebugLogs = EndPoint.debug;
+    CacheManager.showDebugLogs = EndPoint.debug_showLog;
     var cacheManager = await CacheManager.getInstance();
     CacheManager.maxAgeCacheObject = new Duration(hours: 1);
 

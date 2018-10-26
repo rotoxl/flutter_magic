@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:app/app_data.dart';
 import 'package:app/models/end_point.dart';
 
 class EditDetailsPage extends StatefulWidget {

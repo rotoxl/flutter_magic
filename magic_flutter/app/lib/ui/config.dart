@@ -33,16 +33,25 @@ class _ConfigPageState extends State<ConfigPage> {
     return AppBar(
           title: new Text('Choose endpoint'),
           actions: <Widget>[
-  //        IconButton(icon: const Icon(Icons.save),onPressed: () {appData.save();},),
-  //        IconButton(icon: const Icon(Icons.folder_open),onPressed: () {print(appData.loadEndPoints());},),
-            IconButton(icon: const Icon(Icons.add), onPressed: () {this.endPointAdd();},),
-            IconButton(icon: const Icon(Icons.cloud_download), onPressed: () {this.endPointsRefresh();},),
+            // IconButton(icon: const Icon(Icons.save),onPressed: () {appData.save();},),
+            // IconButton(icon: const Icon(Icons.folder_open),onPressed: () {print(appData.loadEndPoints());},),
+            // IconButton(icon: const Icon(Icons.add), onPressed: () {this.endPointAdd();},),
+            // IconButton(icon: const Icon(Icons.cloud_download), onPressed: () {this.endPointsRefresh();},),
           ]
       );
   }
   _buildList(BuildContext context) {
     var _endpoints=appData.endPoints().values.toList();
     _endpoints.sort((EndPoint a, EndPoint b) => a.endpointUrl.compareTo(b.endpointUrl) );
+
+    if (AppData.productionMode){
+      for (var i=_endpoints.length-1; i>=0; i--){
+        var e=_endpoints[i];
+        if (e.endpointTitle.startsWith('_')){
+          _endpoints.removeAt(i);
+        }
+      }
+    }
 
     var itemCount=(_endpoints.length*2)-1;
     return ListView.builder(

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:app/app_data.dart';
 import 'package:cached_network_image/cached_network_image.dart';

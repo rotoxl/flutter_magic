@@ -34,6 +34,7 @@ enum MColors{
 }
 
 class AppData{
+  static bool productionMode=true;
   HashMap<String, EndPoint> _endPoints=HashMap<String, EndPoint>();
   String _fixedEndPoint;
 
@@ -290,17 +291,17 @@ class AppData{
     }
   }
 
-  static void debugPrintSection(bool debug, String literal, dynamic json) {
-    if (debug) {
+  static void debugPrintSection(bool debug_showLog, String literal, dynamic json) {
+    if (debug_showLog) {
       print (' ');
       print (' ');
       print (' ');
       print ('========================');
-      debugPrint(debug, literal, json);
+      debugPrint(debug_showLog, literal, json);
     }
   }
-  static void debugPrint(bool debug, String literal, dynamic json) {
-    if (debug){
+  static void debugPrint(bool debug_showLog, String literal, dynamic json) {
+    if (debug_showLog){
       print ('>'+literal);
       print (json);
     }

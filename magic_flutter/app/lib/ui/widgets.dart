@@ -227,6 +227,7 @@ class EPTextWidget extends EPWidget{
       }
     } else if (this.field!=null){
       var t=card.get(this.field);
+      
       var style=this.textTheme.body1;
 
       if (this.style=='title')
@@ -256,8 +257,8 @@ class EPTextWidget extends EPWidget{
         int maxLines=5;
         var moreStyle= textTheme.body1.copyWith(fontSize: 16.0, color: theme.accentColor);
         textContent.addAll([
-          Text(t, style:this.textTheme.body1, textAlign: align, maxLines: maxLines),
-          Row(
+          Text(t??'Empty', style:this.textTheme.body1, textAlign: align, maxLines: maxLines),
+          t==null?Row():Row(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -318,33 +319,33 @@ class EPFieldsWidget extends EPWidget{
 
     var l=List<dynamic>.from(json['fields']);
     for (var i=0; i<l.length; i++){
-    var fila=l[i];
-    if (fila.runtimeType.toString()=='String'){
-    var e=new EPLabelText();
-    e.field=fila;
-    c.fields.add(e);
-    }
-    else {
-    var item=Map<String, String>.from(l[i]);
+      var fila=l[i];
+      if (fila.runtimeType.toString()=='String'){
+        var e=new EPLabelText();
+        e.field=fila;
+        c.fields.add(e);
+      }
+      else {
+        var item=Map<String, String>.from(l[i]);
 
-    if (item['field']!=null){
-    var e=new EPLabelText();
-    e.label=item['label'];
-    e.field=item['field'];
+        if (item['field']!=null){
+          var e=new EPLabelText();
+          e.label=item['label'];
+          e.field=item['field'];
 
-    c.fields.add(e);
-    } else {
-    var e=new EPLabelText();
+          c.fields.add(e);
+        } else {
+          var e=new EPLabelText();
 
-    e.id=item['id'];
-    e.label=item['label'];
-    c.fields.add(e);
+          e.id=item['id'];
+          e.label=item['label'];
+          c.fields.add(e);
 
-    if (item['left']!=null)e.left=item['left'];
-    if (item['right']!=null) e.right=item['right'];
-    }
+          if (item['left']!=null)e.left=item['left'];
+          if (item['right']!=null) e.right=item['right'];
+        }
 
-    }
+      }
     }
     return c;
   }
@@ -1152,7 +1153,7 @@ class EPRelatedWidget extends EPWidget{
     for (var i = 0; i < this.fields.length; i++) {
       EPRelatedItem f = this.fields[i];
 
-      AppData.debugPrint(EndPoint.debug, 'EPRelatedItem', f);
+      AppData.debugPrint(EndPoint.debug_showLog, 'EPRelatedItem', f);
 
       if (f.type == NameType.linkToSameEndPoint) {
         var values = card.get(f.field);
