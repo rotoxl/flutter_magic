@@ -1,3 +1,7 @@
+# New article in Medium
+
+https://medium.com/@rotoxl/api-explorer-a6b8c9aa97bb
+
 # Now in beta@Google Play 
 
 ![https://play.google.com/store/apps/details?id=apiexplorer.com.app](screenshots/shop-android.png) 

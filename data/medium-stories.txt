@@ -1,4 +1,4 @@
-Hi there! this is a storie about a new app, API Explorer, built on top of Flutter and Firebase.
+Hi there! this is a story about a new app, API Explorer, built on top of Flutter and Firebase. You can grab the code from https://github.com/rotoxl/flutter_magic.
 
 = Overview =
 API Explorer's target is to provide a tool somewhere between low and highlevel to visualize the data in an API. 
@@ -29,16 +29,25 @@ Wait: but what if data doesn't follow this structure?
     <imagen con las distintas plantillas>
 
 
-Under the hood
-    It all starts with a public data API:
-        https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json
-    
-    API Explorer reads & parses it
-
-
-
-
 Enter the template model
+    Right now API Explorers provides 4 basic templates for the listing and 4 templates for the detail window. Every template is just a starting point, they all contain several customizable features
+        * detail window: suitable for... pretty much everything. Contains a hero section, a header section with poster, title, stats and chips, description, key/value listing, images widget, related widget...
+        * compare: suitable for item compare screens
+        * hero: large, background image, with a few texts
+        * match: suitable for competitions, like a football league. 
+    <image>
+
+Listing model
+    There are also, several models to list the items in the data API:
+        * list
+        * image grid (without name)
+        * image grid with name
+        * match
+    <image>
+
+What's next
+    In future releases I plan to allow everyone to add new data APIs. You will also be able to test your own APIs. I also want to add new templates for new use cases. Time will tell.
+    
 
 
 --
@@ -48,6 +57,13 @@ Note: API Explorer is not affiliated with, or in any way associated with any of 
 
 
 
+===============================================
+Under the hood
+    It all starts with a public data API:
+        https://s3-eu-west-1.amazonaws.com/api-explorer-app/planets/planets.json
+    
+    API Explorer reads & parses it, obtaining a set of items
+===============================================
 The series will contain the following articles
 * Overview
     At first API Explorer only needs a data API EndPoint
